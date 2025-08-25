@@ -1,50 +1,43 @@
 version: 0.2
 
 phases:
-  install:
-    commands:
-      - echo "Using AWS CodeBuild standard image with Docker"
-      - echo "Privileged mode must be enabled in the project settings"
-      # Pull the AccuKnox scanner container
-      - docker pull public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1
-
   pre_build:
     commands:
-      - echo "Checking Docker availability..."
-      - docker version
+      - echo "Starting AccuKnox SAST scan"
+      - echo "Checking AccuKnox scanner version"
+      - docker run --rm public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 --help
+      - export PIPELINE_ID="$CODEBUILD_BUILD_ID"
+      - export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/builds/$CODEBUILD_BUILD_ID"
 
   build:
     commands:
-      - |
-        echo "Running AccuKnox scanner..."
-        
-        # Optional: set SCAN_IMAGE if provided
-        if [ -n "$SCAN_IMAGE" ]; then
-          export SCAN_IMAGE="$SCAN_IMAGE"
-        fi
+      - echo "Running AccuKnox scan"
+      - echo "Pipeline ID is $PIPELINE_ID"
 
-        # Soft fail option
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
+      # --- Git metadata setup ---
+      - export REPO_URL="https://github.com/IshaanJ18/use-cases"
+      - export COMMIT_SHA=$(git rev-parse HEAD)
+      - export COMMIT_REF=$(git rev-parse --abbrev-ref HEAD)
+      - echo "Repository URL: $REPO_URL"
+      - echo "Commit SHA: $COMMIT_SHA"
+      - echo "Commit Ref: $COMMIT_REF"
+      # --------------------------
 
-        # Display pipeline/job info
-        echo "PIPELINE_ID=${PIPELINE_ID:-$CODEBUILD_BUILD_ID}"
-        echo "JOB_URL=${JOB_URL:-https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT/build/$CODEBUILD_BUILD_ID}"
-
-        # Run the scanner container with Git metadata
-        docker run --rm \
+      # Run the scanner container with Git metadata
+      - docker run --rm \
           -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" \
           -e ACCUKNOX_TENANT="$ACCUKNOX_TENANT" \
           -e ACCUKNOX_ENDPOINT="$ACCUKNOX_ENDPOINT" \
           -e ACCUKNOX_LABEL="$ACCUKNOX_LABEL" \
           -e SCAN_IMAGE="$SCAN_IMAGE" \
           public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 \
-          scan $SOFT_FAIL_ARG sast \
-          --repo-url "$CODEBUILD_SOURCE_REPO_URL" \
-          --commit-ref "$CODEBUILD_RESOLVED_SOURCE_VERSION" \
-          --commit-sha "$CODEBUILD_RESOLVED_SOURCE_VERSION"
+          scan --softfail sast \
+          --pipeline-id "$PIPELINE_ID" \
+          --job-url "$JOB_URL" \
+          --repo-url "$REPO_URL" \
+          --commit-sha "$COMMIT_SHA" \
+          --commit-ref "$COMMIT_REF"
 
-  post_build:
-    commands:
-      - echo "Build completed"
+artifacts:
+  files:
+    - '**/*'
