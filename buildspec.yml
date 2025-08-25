@@ -1,35 +1,40 @@
 version: 0.2
 
+# This replicates GitLab CI's docker:dind service approach
 phases:
+  install:
+    commands:
+      - echo "=== REPLICATING GITLAB CI DOCKER:DIND SETUP ==="
+      - echo "Starting Docker-in-Docker daemon (equivalent to GitLab's docker:dind service)"
+      - apt-get update
+      - apt-get install -y docker.io
+      
   pre_build:
     commands:
-      - echo "=== DEBUGGING ACCUKNOX CONTAINER ==="
-      - echo "Current user and permissions:"
-      - whoami
-      - groups
-      - echo "Checking for Docker binary:"
-      - which docker || echo "Docker binary not found"
-      - which dockerd || echo "Dockerd binary not found"
-      - ls -la /usr/bin/docker* || echo "No docker binaries in /usr/bin"
-      - ls -la /usr/local/bin/docker* || echo "No docker binaries in /usr/local/bin"
-      - echo "Checking if Docker socket exists:"
-      - ls -la /var/run/docker.sock || echo "Docker socket not found"
-      - echo "Trying to start Docker daemon manually:"
-      - dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --data-root=/tmp/docker &
-      - sleep 15
-      - echo "Checking Docker daemon status:"
-      - docker version || echo "Docker version failed"
-      - docker info || echo "Docker info failed"
-      - echo "=== END DEBUGGING ==="
+      - echo "Starting Docker daemon (GitLab docker:dind equivalent)"
+      - dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --tls=false &
+      - echo "Waiting for Docker daemon to be ready..."
+      - timeout 30 sh -c 'until docker info; do echo "Waiting for Docker daemon..."; sleep 2; done'
+      - echo "Docker daemon is ready!"
+      - docker info
+      - echo "Setting GitLab CI equivalent environment variables"
+      - export DOCKER_HOST="tcp://localhost:2375"
+      - export DOCKER_TLS_CERTDIR=""
+      - export PIPELINE_ID="$CODEBUILD_BUILD_ID"
+      - export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/builds/$CODEBUILD_BUILD_ID"
+      - echo "Authenticating with Docker Hub (to avoid rate limits)"
+      - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
       
   build:
     commands:
-      - echo "Attempting AccuKnox scan (may fail due to Docker issues)"
-      - export PIPELINE_ID="$CODEBUILD_BUILD_ID"
-      - export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/builds/$CODEBUILD_BUILD_ID"
+      - echo "=== RUNNING ACCUKNOX SAST SCAN ==="
+      - echo "This replicates the GitLab CI accuknox-sast-scan job"
       - export REPO_URL="https://github.com/IshaanJ18/use-cases"
       - export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
       - export COMMIT_REF="main"
+      - echo "Docker is available for AccuKnox scanner:"
+      - docker ps
+      - echo "Running AccuKnox scan (same as GitLab CI)"
       - accuknox-aspm-scanner scan --softfail sast --pipeline-id "$PIPELINE_ID" --job-url "$JOB_URL" --repo-url "$REPO_URL" --commit-sha "$COMMIT_SHA" --commit-ref "$COMMIT_REF"
 
 artifacts:
