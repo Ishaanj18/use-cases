@@ -1,25 +1,18 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      docker: 20
-    commands:
-      - echo "Installing prerequisites..."
-      - echo "Ensure Docker is available"
-
   pre_build:
     commands:
       - echo "Starting AccuKnox SAST scan"
       - echo "Checking AccuKnox scanner version"
       - docker run --rm public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 --help
       - export PIPELINE_ID="$CODEBUILD_BUILD_ID"
-      - export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/builds/$CODEBUILD_BUILD_ID"
+      - export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
 
   build:
     commands:
       - echo "Running AccuKnox scan"
-      - echo "Pipeline ID is $PIPELINE_ID"
+      - echo "Pipeline ID: $PIPELINE_ID"
 
       # Git metadata
       - export REPO_URL="$CODEBUILD_SOURCE_REPO_URL"
@@ -29,7 +22,7 @@ phases:
       - echo "Commit SHA: $COMMIT_SHA"
       - echo "Commit Ref: $COMMIT_REF"
 
-      # Run scanner container (as one string block)
+      # Run the scanner container as a single multi-line command
       - |
         docker run --rm \
           -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" \
