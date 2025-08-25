@@ -3,18 +3,45 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Docker is already available in this image"
-      - docker version
+      - echo "Using AWS CodeBuild standard image with Docker"
+      - echo "Privileged mode must be enabled in the project settings"
+      # Pull the AccuKnox scanner container
       - docker pull public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1
+
+  pre_build:
+    commands:
+      - echo "Checking Docker availability..."
+      - docker version
 
   build:
     commands:
-      - echo "Running AccuKnox scanner..."
-      - docker run --rm \
+      - |
+        echo "Running AccuKnox scanner..."
+        
+        # Optional: set SCAN_IMAGE if provided
+        if [ -n "$SCAN_IMAGE" ]; then
+          export SCAN_IMAGE="$SCAN_IMAGE"
+        fi
+
+        # Soft fail option
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        # Display pipeline/job info
+        echo "PIPELINE_ID=${PIPELINE_ID:-$CODEBUILD_BUILD_ID}"
+        echo "JOB_URL=${JOB_URL:-https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT/build/$CODEBUILD_BUILD_ID}"
+
+        # Run the scanner container
+        docker run --rm \
           -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" \
           -e ACCUKNOX_TENANT="$ACCUKNOX_TENANT" \
           -e ACCUKNOX_ENDPOINT="$ACCUKNOX_ENDPOINT" \
           -e ACCUKNOX_LABEL="$ACCUKNOX_LABEL" \
           -e SCAN_IMAGE="$SCAN_IMAGE" \
           public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 \
-          scan --softfail sast
+          scan $SOFT_FAIL_ARG sast
+
+  post_build:
+    commands:
+      - echo "Build completed"
