@@ -2,37 +2,19 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      docker: 20
     commands:
-      - echo "Installing Docker daemon inside scanner image..."
-      - apt-get update && apt-get install -y docker.io
-      - nohup dockerd --host=unix:///var/run/docker.sock \
-          --host=tcp://0.0.0.0:2375 --storage-driver=overlay2 >/tmp/dockerd.log 2>&1 &
-      # wait until daemon is ready
-      - timeout 30 sh -c "until docker info >/dev/null 2>&1; do sleep 1; done"
-      - echo "Docker daemon is ready!"
-
-  pre_build:
-    commands:
-      - echo "Checking Docker availability..."
+      - echo "Docker is already available in this image"
       - docker version
+      - docker pull public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1
 
   build:
     commands:
-      - echo "Running AccuKnox SAST scan..."
-      - |
-        if [ -n "$SCAN_IMAGE" ]; then
-          export SCAN_IMAGE="$SCAN_IMAGE"
-        fi
-
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
-
-        echo "PIPELINE_ID=${PIPELINE_ID:-$CODEBUILD_BUILD_ID}"
-        echo "JOB_URL=${JOB_URL:-https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT/build/$CODEBUILD_BUILD_ID}"
-
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast \
-          --pipeline-id "${PIPELINE_ID:-$CODEBUILD_BUILD_ID}" \
-          --job-url "${JOB_URL}"
+      - echo "Running AccuKnox scanner..."
+      - docker run --rm \
+          -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" \
+          -e ACCUKNOX_TENANT="$ACCUKNOX_TENANT" \
+          -e ACCUKNOX_ENDPOINT="$ACCUKNOX_ENDPOINT" \
+          -e ACCUKNOX_LABEL="$ACCUKNOX_LABEL" \
+          -e SCAN_IMAGE="$SCAN_IMAGE" \
+          public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 \
+          scan --softfail sast
