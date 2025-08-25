@@ -13,7 +13,19 @@ phases:
     commands:
       - echo "Running AccuKnox scan"
       - echo "Pipeline ID is $PIPELINE_ID"
-      - accuknox-aspm-scanner scan --softfail sast --pipeline-id "$PIPELINE_ID" --job-url "$JOB_URL"
+      - echo "Setting up repository metadata"
+      - export REPO_URL="https://github.com/IshaanJ18/use-cases"
+      - export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - export COMMIT_REF="$CODEBUILD_WEBHOOK_HEAD_REF"
+      - echo "Repository URL:" $REPO_URL
+      - echo "Commit SHA:" $COMMIT_SHA
+      - echo "Commit Ref:" $COMMIT_REF
+      - |
+        if [ -z "$COMMIT_REF" ]; then
+          export COMMIT_REF="main"
+          echo "Using default branch: main"
+        fi
+      - accuknox-aspm-scanner scan --softfail sast --pipeline-id "$PIPELINE_ID" --job-url "$JOB_URL" --repo-url "$REPO_URL" --commit-sha "$COMMIT_SHA" --commit-ref "$COMMIT_REF"
 
 artifacts:
   files:
