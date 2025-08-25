@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Starting SAST scan..."
+      - if [ -n "$SCAN_IMAGE" ]; then export SCAN_IMAGE="$SCAN_IMAGE"; fi
+      - if [ "$SOFT_FAIL" = "true" ]; then export SOFT_FAIL_ARG="--softfail"; fi
+
+  build:
+    commands:
+      - echo "Pipeline ID: ${CODEBUILD_BUILD_ID}"
+      - echo "Job URL: https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_BUILD_ID"
+      - accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast \
+          --pipeline-id "${CODEBUILD_BUILD_ID}" \
+          --job-url "https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_BUILD_ID"
