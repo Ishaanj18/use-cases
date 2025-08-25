@@ -5,13 +5,18 @@ phases:
     runtime-versions:
       docker: 20
     commands:
-      - echo "Docker is already installed. Privileged mode must be enabled."
+      - echo "Installing Docker daemon inside scanner image..."
+      - apt-get update && apt-get install -y docker.io
+      - nohup dockerd --host=unix:///var/run/docker.sock \
+          --host=tcp://0.0.0.0:2375 --storage-driver=overlay2 >/tmp/dockerd.log 2>&1 &
+      # wait until daemon is ready
+      - timeout 30 sh -c "until docker info >/dev/null 2>&1; do sleep 1; done"
+      - echo "Docker daemon is ready!"
 
   pre_build:
     commands:
       - echo "Checking Docker availability..."
       - docker version
-      - echo "Docker is ready!"
 
   build:
     commands:
