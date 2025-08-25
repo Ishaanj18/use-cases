@@ -1,17 +1,39 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      python: 3.9
+  pre_build:
     commands:
-      - echo "Installing AccuKnox scanner..."
-      - pip install accuknox-aspm-scanner
+      - echo "Starting AccuKnox SAST scan..."
+      - echo "Build ID: $CODEBUILD_BUILD_ID"
+      - echo "Build URL: https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_BUILD_ARN/builds/$CODEBUILD_BUILD_ID"
+      
   build:
     commands:
-      - echo "Running AccuKnox scan..."
-      # Replace <YOUR_TOKEN> with the actual AccuKnox Token from your SaaS account
-      - accuknox-aspm-scanner scan --token $ACCUKNOX_TOKEN --softfail code --path .
+      - |
+        # Set pipeline and job URL equivalents
+        export PIPELINE_ID="$CODEBUILD_BUILD_ID"
+        export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/builds/$CODEBUILD_BUILD_ID"
+        
+        # Handle SCAN_IMAGE if provided
+        if [ -n "$SCAN_IMAGE" ]; then
+          export SCAN_IMAGE="$SCAN_IMAGE"
+          echo "Using SCAN_IMAGE: $SCAN_IMAGE"
+        fi
+
+        # Set softfail argument
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+          echo "Soft fail enabled"
+        fi
+
+        echo "PIPELINE_ID=${PIPELINE_ID}"
+        echo "JOB_URL=${JOB_URL}"
+        
+        # Run the AccuKnox SAST scan (equivalent to GitLab pipeline)
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast \
+          --pipeline-id "${PIPELINE_ID}" \
+          --job-url "${JOB_URL}"
+
 artifacts:
   files:
     - '**/*'
