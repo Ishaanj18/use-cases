@@ -21,22 +21,29 @@ phases:
       - echo "Running AccuKnox scan"
       - echo "Pipeline ID is $PIPELINE_ID"
 
-      # --- Git metadata ---
+      # Git metadata
       - export REPO_URL="$CODEBUILD_SOURCE_REPO_URL"
       - export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
       - export COMMIT_REF=$(git rev-parse --abbrev-ref HEAD || echo "main")
       - echo "Repository URL: $REPO_URL"
       - echo "Commit SHA: $COMMIT_SHA"
       - echo "Commit Ref: $COMMIT_REF"
-      # --------------------
 
-      # Run the scanner container
-      - docker run --rm -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" -e ACCUKNOX_TENANT="$ACCUKNOX_TENANT" \
-        -e ACCUKNOX_ENDPOINT="$ACCUKNOX_ENDPOINT" -e ACCUKNOX_LABEL="$ACCUKNOX_LABEL" \
-        -e SCAN_IMAGE="$SCAN_IMAGE" \
-        public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 \
-        scan --softfail sast --pipeline-id "$PIPELINE_ID" --job-url "$JOB_URL" \
-        --repo-url "$REPO_URL" --commit-sha "$COMMIT_SHA" --commit-ref "$COMMIT_REF"
+      # Run scanner container (as one string block)
+      - |
+        docker run --rm \
+          -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" \
+          -e ACCUKNOX_TENANT="$ACCUKNOX_TENANT" \
+          -e ACCUKNOX_ENDPOINT="$ACCUKNOX_ENDPOINT" \
+          -e ACCUKNOX_LABEL="$ACCUKNOX_LABEL" \
+          -e SCAN_IMAGE="$SCAN_IMAGE" \
+          public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 \
+          scan --softfail sast \
+          --pipeline-id "$PIPELINE_ID" \
+          --job-url "$JOB_URL" \
+          --repo-url "$REPO_URL" \
+          --commit-sha "$COMMIT_SHA" \
+          --commit-ref "$COMMIT_REF"
 
 artifacts:
   files:
