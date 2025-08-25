@@ -5,14 +5,12 @@ phases:
     runtime-versions:
       docker: 20
     commands:
-      - echo "Installing prerequisites..."
-      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock \
-        --host=tcp://0.0.0.0:2375 --storage-driver=overlay2 &
+      - echo "Docker is already installed. Privileged mode must be enabled."
 
   pre_build:
     commands:
-      - echo "Waiting for Docker to start..."
-      - until docker info >/dev/null 2>&1; do sleep 1; done
+      - echo "Checking Docker availability..."
+      - docker version
       - echo "Docker is ready!"
 
   build:
