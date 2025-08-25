@@ -32,7 +32,7 @@ phases:
         echo "PIPELINE_ID=${PIPELINE_ID:-$CODEBUILD_BUILD_ID}"
         echo "JOB_URL=${JOB_URL:-https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT/build/$CODEBUILD_BUILD_ID}"
 
-        # Run the scanner container
+        # Run the scanner container with Git metadata
         docker run --rm \
           -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" \
           -e ACCUKNOX_TENANT="$ACCUKNOX_TENANT" \
@@ -40,7 +40,10 @@ phases:
           -e ACCUKNOX_LABEL="$ACCUKNOX_LABEL" \
           -e SCAN_IMAGE="$SCAN_IMAGE" \
           public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 \
-          scan $SOFT_FAIL_ARG sast
+          scan $SOFT_FAIL_ARG sast \
+          --repo-url "$CODEBUILD_SOURCE_REPO_URL" \
+          --commit-ref "$CODEBUILD_RESOLVED_SOURCE_VERSION" \
+          --commit-sha "$CODEBUILD_RESOLVED_SOURCE_VERSION"
 
   post_build:
     commands:
