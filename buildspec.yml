@@ -2,20 +2,65 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "Starting AccuKnox SAST scan"
+      - echo "Starting AccuKnox scan"
   build:
     commands:
-      - echo "Running AccuKnox scan"
-      - |
-        export SOFT_FAIL=true
+    - |
+        ## Configure Env Vars
+        RESULTS: ""
+        BRANCH: "$CI_COMMIT_SHA"
+        EXCLUDE_PATHS: ""
+        SOFT_FAIL: "true" 
+
+        if [ -n "$SCAN_IMAGE" ]; then
+          export SCAN_IMAGE="$SCAN_IMAGE"
+        fi
+
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
-        echo "Installing AccuKnox scanner..."
-        pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-        echo "Running SAST scan..."
-        accuknox-aspm-scanner scan --softfail sast 
-        
+
+        COMMAND="git file://."
+
+        ARGS=""
+        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+
+    - |
+        ## Configure Env Vars
+        DIRECTORY: "."
+        COMPACT: true
+        QUIET: "true"
+        SOFT_FAIL: "true" 
+
+        if [ -n "$SCAN_IMAGE" ]; then
+          export SCAN_IMAGE="$SCAN_IMAGE"
+        fi
+
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        CMD_ARGS=""
+        [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
+        [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+        [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
+        [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+        [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
+
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+
 artifacts:
   files:
     - '**/*'
+
+
+
+
+
+
