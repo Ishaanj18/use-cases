@@ -6,17 +6,9 @@ phases:
   build:
     commands:
       - echo "Running AccuKnox scan"
-      - export PIPELINE_ID="$CODEBUILD_BUILD_ID"
-      - export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
-      - export REPO_URL="$CODEBUILD_SOURCE_REPO_URL"
-      - export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
-      - export COMMIT_REF="main"
-      - echo "Pipeline ID: $PIPELINE_ID"
-      - echo "Repository URL: $REPO_URL"
-      - echo "Commit SHA: $COMMIT_SHA"
-      - echo "Commit Ref: $COMMIT_REF"
-      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages 
-      - accuknox-aspm-scanner scan --softfail secret --command "git file://." --container-mode
+      - |
+          pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+          accuknox-aspm-scanner scan --softfail secret --command "git file://." --container-mode
 artifacts:
   files:
     - '**/*'
