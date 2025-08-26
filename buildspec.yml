@@ -6,7 +6,6 @@ phases:
   build:
     commands:
     - |
-        export RESULTS=""
         export BRANCH="all"
         export EXCLUDE_PATHS=""
         export SOFT_FAIL="true" 
