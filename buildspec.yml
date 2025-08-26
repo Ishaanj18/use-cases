@@ -1,4 +1,12 @@
 version: 0.2
+env:
+  variables:
+      PIPELINE_ID: "$CODEBUILD_BUILD_ID"
+      JOB_URL: "https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
+      REPOSITORY_URL: "$CODEBUILD_SOURCE_REPO_URL"
+      COMMIT_SHA: "$CODEBUILD_RESOLVED_SOURCE_VERSION"
+      COMMIT_REF: "main"
+      
 phases:
   pre_build:
     commands:
@@ -7,11 +15,7 @@ phases:
     commands:
       - echo "Running AccuKnox scan"
       - |
-        PIPELINE_ID="$CODEBUILD_BUILD_ID"
-        JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
-        REPOSITORY_URL="$CODEBUILD_SOURCE_REPO_URL"
-        COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
-        COMMIT_REF=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+        printenv
         echo "Pipeline ID: $PIPELINE_ID"
         echo "Repository URL: $REPOSITORY_URL" 
         echo "Commit SHA: $COMMIT_SHA"
