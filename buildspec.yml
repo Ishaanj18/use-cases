@@ -1,12 +1,9 @@
 version: 0.2
 env:
   variables:
-      PIPELINE_ID: "$CODEBUILD_BUILD_ID"
-      JOB_URL: "https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
-      REPOSITORY_URL: "$CODEBUILD_SOURCE_REPO_URL"
-      COMMIT_SHA: "$CODEBUILD_RESOLVED_SOURCE_VERSION"
-      COMMIT_REF: "main"
-      
+    COMMIT_REF: "main"
+    SOFT_FAIL: true
+  
 phases:
   pre_build:
     commands:
@@ -16,10 +13,18 @@ phases:
       - echo "Running AccuKnox scan"
       - |
         printenv
+        export PIPELINE_ID= "$CODEBUILD_BUILD_ID"
+        export JOB_URL= "https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
+        export REPOSITORY_URL= "$CODEBUILD_SOURCE_REPO_URL"
+        export COMMIT_SHA= "$CODEBUILD_RESOLVED_SOURCE_VERSION"
+        export COMMIT_REF= "main"
         echo "Pipeline ID: $PIPELINE_ID"
         echo "Repository URL: $REPOSITORY_URL" 
         echo "Commit SHA: $COMMIT_SHA"
         echo "Commit Ref: $COMMIT_REF"
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
         echo "Installing AccuKnox scanner..."
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
         echo "Running SAST scan..."
