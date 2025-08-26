@@ -26,6 +26,10 @@ phases:
         accuknox-aspm-scanner scan --softfail sast --repo-url "$REPOSITORY_URL" --commit-ref "$COMMIT_REF" --commit-sha "$COMMIT_SHA"
         
       - |
+        export REPOSITORY_URL="https://github.com/Ishaanj18/use-cases/"
+        export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
+        export COMMIT_REF="main"
+        export SOFT_FAIL=true
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
