@@ -6,10 +6,10 @@ phases:
   build:
     commands:
     - |
-        export RESULTS= ""
-        export BRANCH= "all"
-        export EXCLUDE_PATHS= ""
-        export SOFT_FAIL= "true" 
+        export RESULTS=""
+        export BRANCH="all"
+        export EXCLUDE_PATHS=""
+        export SOFT_FAIL="true" 
 
         if [ -n "$SCAN_IMAGE" ]; then
           export SCAN_IMAGE="$SCAN_IMAGE"
@@ -30,10 +30,10 @@ phases:
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
     - |
-        export DIRECTORY= "."
-        export COMPACT= true
-        export QUIET= "true"
-        export SOFT_FAIL= "true" 
+        export DIRECTORY="."
+        export COMPACT=true
+        export QUIET="true"
+        export SOFT_FAIL="true" 
 
         if [ -n "$SCAN_IMAGE" ]; then
           export SCAN_IMAGE="$SCAN_IMAGE"
