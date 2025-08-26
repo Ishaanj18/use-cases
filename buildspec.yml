@@ -8,7 +8,7 @@ phases:
     - |
         ## Configure Env Vars
         RESULTS: ""
-        BRANCH: "$CI_COMMIT_SHA"
+        BRANCH: "all"
         EXCLUDE_PATHS: ""
         SOFT_FAIL: "true" 
 
