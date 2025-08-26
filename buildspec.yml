@@ -15,7 +15,8 @@ phases:
       - echo "Repository URL: $REPO_URL"
       - echo "Commit SHA: $COMMIT_SHA"
       - echo "Commit Ref: $COMMIT_REF"
-      - docker run --rm public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1
+      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+      - accuknox-aspm-scanner scan --softfail secret --command "git file://."
 artifacts:
   files:
     - '**/*'
