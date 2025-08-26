@@ -7,19 +7,20 @@ phases:
     commands:
       - echo "Running AccuKnox scan"
       - |
-          PIPELINE_ID="$CODEBUILD_BUILD_ID"
-          JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
-          REPOSITORY_URL="$CODEBUILD_SOURCE_REPO_URL"
-          COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
-          COMMIT_REF=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
-          echo "Pipeline ID: $PIPELINE_ID"
-          echo "Repository URL: $REPOSITORY_URL" 
-          echo accuknox-aspm-scanner scan --softfail sast --repo-url $REPOSITORY_URL --commit-ref $COMMIT_REF --commit-sha $COMMIT_SHA
-          echo "Commit SHA: $COMMIT_SHA"
-          echo "Commit Ref: $COMMIT_REF"
-          pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-          accuknox-aspm-scanner scan --softfail sast --repo-url $REPOSITORY_URL --commit-ref $COMMIT_REF --commit-sha $COMMIT_SHA
-          
+        PIPELINE_ID="$CODEBUILD_BUILD_ID"
+        JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
+        REPOSITORY_URL="$CODEBUILD_SOURCE_REPO_URL"
+        COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
+        COMMIT_REF=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+        echo "Pipeline ID: $PIPELINE_ID"
+        echo "Repository URL: $REPOSITORY_URL" 
+        echo "Commit SHA: $COMMIT_SHA"
+        echo "Commit Ref: $COMMIT_REF"
+        echo "Installing AccuKnox scanner..."
+        pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+        echo "Running SAST scan..."
+        accuknox-aspm-scanner scan --softfail sast --repo-url "$REPOSITORY_URL" --commit-ref "$COMMIT_REF" --commit-sha "$COMMIT_SHA"
+        
 artifacts:
   files:
     - '**/*'
