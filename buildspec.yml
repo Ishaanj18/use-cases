@@ -12,7 +12,6 @@ phases:
     commands:
       - echo "Running AccuKnox scan"
       - |
-        printenv
         export PIPELINE_ID= "$CODEBUILD_BUILD_ID"
         export JOB_URL= "https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
         export REPOSITORY_URL= "$CODEBUILD_SOURCE_REPO_URL"
