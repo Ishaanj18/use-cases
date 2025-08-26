@@ -15,7 +15,37 @@ phases:
       - echo "Repository URL: $REPO_URL"
       - echo "Commit SHA: $COMMIT_SHA"
       - echo "Commit Ref: $COMMIT_REF"
-      - docker run --rm public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 scan --softfail sast --pipeline-id "$PIPELINE_ID" --job-url "$JOB_URL" --repo-url "$REPO_URL" --commit-sha "$COMMIT_SHA" --commit-ref "$COMMIT_REF"
+      - |
+        if [ -n "$SCAN_IMAGE" ]; then
+          export SCAN_IMAGE="$SCAN_IMAGE"
+        fi
+        
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        else
+          SOFT_FAIL_ARG="--softfail"
+        fi
+        
+        echo "Starting AccuKnox SAST scan..."
+        echo "PIPELINE_ID=${PIPELINE_ID}"
+        echo "JOB_URL=${JOB_URL}"
+        echo "REPO_URL=${REPO_URL}"
+        echo "COMMIT_SHA=${COMMIT_SHA}"
+        echo "COMMIT_REF=${COMMIT_REF}"
+        
+        docker run --rm \
+          -e ACCUKNOX_TOKEN="$ACCUKNOX_TOKEN" \
+          -e ACCUKNOX_TENANT="$ACCUKNOX_TENANT" \
+          -e ACCUKNOX_ENDPOINT="$ACCUKNOX_ENDPOINT" \
+          -e ACCUKNOX_LABEL="$ACCUKNOX_LABEL" \
+          -e SCAN_IMAGE="$SCAN_IMAGE" \
+          public.ecr.aws/k9v9d5v2/accuknox-aspm-scanner:v0.9.1 \
+          scan $SOFT_FAIL_ARG sast \
+          --pipeline-id "$PIPELINE_ID" \
+          --job-url "$JOB_URL" \
+          --repo-url "$REPO_URL" \
+          --commit-sha "$COMMIT_SHA" \
+          --commit-ref "$COMMIT_REF"
 artifacts:
   files:
     - '**/*'
