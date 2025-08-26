@@ -13,11 +13,13 @@ phases:
           export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
           export COMMIT_REF="main"
           echo "Pipeline ID: $PIPELINE_ID"
-          echo "Repository URL: $REPOSITORY_URL"
+          echo "Repository URL: $REPOSITORY_URL" 
+          echo accuknox-aspm-scanner scan --softfail sast --repo-url $REPOSITORY_URL --commit-ref $COMMIT_REF --commit-sha $COMMIT_SHA
           echo "Commit SHA: $COMMIT_SHA"
           echo "Commit Ref: $COMMIT_REF"
           pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-          accuknox-aspm-scanner scan --softfail sast
+          accuknox-aspm-scanner scan --softfail sast --repo-url $REPOSITORY_URL --commit-ref $COMMIT_REF --commit-sha $COMMIT_SHA
+          
 artifacts:
   files:
     - '**/*'
