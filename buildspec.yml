@@ -9,7 +9,7 @@ phases:
       - |
         export PIPELINE_ID="$CODEBUILD_BUILD_ID"
         export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
-        export REPOSITORY_URL="$CODEBUILD_SOURCE_REPO_URL"
+        export REPOSITORY_URL="https://github.com/Ishaanj18/use-cases/"
         export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
         export COMMIT_REF="main"
         export SOFT_FAIL=true
@@ -24,6 +24,20 @@ phases:
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
         echo "Running SAST scan..."
         accuknox-aspm-scanner scan --softfail sast --repo-url "$REPOSITORY_URL" --commit-ref "$COMMIT_REF" --commit-sha "$COMMIT_SHA"
+        
+      - |
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+        CMD_ARGS=""
+        [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
+        [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+        [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
+        [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+        [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+        accuknox-aspm-scanner scan --softfail iac --command "$CMD_ARGS" --container-mode --repo-url "$REPOSITORY_URL" --commit-ref "$COMMIT_REF" --commit-sha "$COMMIT_SHA"
+
         
 artifacts:
   files:
