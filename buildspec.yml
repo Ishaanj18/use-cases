@@ -6,7 +6,6 @@ phases:
   build:
     commands:
     - |
-        ## Configure Env Vars
         RESULTS: ""
         BRANCH: "all"
         EXCLUDE_PATHS: ""
@@ -31,7 +30,6 @@ phases:
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
     - |
-        ## Configure Env Vars
         DIRECTORY: "."
         COMPACT: true
         QUIET: "true"
