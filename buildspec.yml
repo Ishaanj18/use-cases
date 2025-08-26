@@ -1,9 +1,4 @@
-version: 0.2
-env:
-  variables:
-    COMMIT_REF: "main"
-    SOFT_FAIL: true
-  
+version: 0.2  
 phases:
   pre_build:
     commands:
@@ -17,6 +12,7 @@ phases:
         export REPOSITORY_URL= "$CODEBUILD_SOURCE_REPO_URL"
         export COMMIT_SHA= "$CODEBUILD_RESOLVED_SOURCE_VERSION"
         export COMMIT_REF= "main"
+        export SOFT_FAIL= true
         echo "Pipeline ID: $PIPELINE_ID"
         echo "Repository URL: $REPOSITORY_URL" 
         echo "Commit SHA: $COMMIT_SHA"
