@@ -8,7 +8,7 @@ phases:
       - echo "Running AccuKnox scan"
       - |
           pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-          accuknox-aspm-scanner scan --softfail secret --command "git file://." --container-mode
+          accuknox-aspm-scanner scan --softfail sast
 artifacts:
   files:
     - '**/*'
