@@ -19,6 +19,22 @@ phases:
           echo "Commit Ref: $COMMIT_REF"
           pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
           accuknox-aspm-scanner scan --softfail sast --repo-url $REPOSITORY_URL --commit-ref $COMMIT_REF --commit-sha $COMMIT_SHA
+          echo "Starting IAC scan..."
+          
+          # Set up IAC scan arguments
+          if [ "$SOFT_FAIL" = "true" ]; then
+            SOFT_FAIL_ARG="--softfail"
+          fi
+          
+          CMD_ARGS=""
+          [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
+          [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+          [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
+          [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+          [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
+          
+          echo "IAC scan command: accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command \"$CMD_ARGS\" --container-mode"
+          accuknox-aspm-scanner scan --softfail iac --command "$CMD_ARGS" --container-mode --repo-url $REPOSITORY_URL --commit-ref $COMMIT_REF --commit-sha $COMMIT_SHA
           
 artifacts:
   files:
