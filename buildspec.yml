@@ -9,7 +9,7 @@ phases:
       - |
           export PIPELINE_ID="$CODEBUILD_BUILD_ID"
           export JOB_URL="https://console.aws.amazon.com/codesuite/codebuild/projects/$CODEBUILD_PROJECT_NAME/build/$CODEBUILD_BUILD_ID"
-          export REPO_URL="$CODEBUILD_SOURCE_REPO_URL"
+          export REPO_URL="https://github.com/Ishaanj18/use-cases"
           export COMMIT_SHA="$CODEBUILD_RESOLVED_SOURCE_VERSION"
           export COMMIT_REF="main"
           echo "Pipeline ID: $PIPELINE_ID"
