@@ -24,10 +24,7 @@ phases:
         #accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
 
       - |
-        if [ -n "$SCAN_IMAGE" ]; then
-          export SCAN_IMAGE="$SCAN_IMAGE"
-        fi
-
+        
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
