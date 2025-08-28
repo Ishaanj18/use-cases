@@ -5,6 +5,10 @@ env:
     DIRECTORY: "."
     COMPACT: "true"
     QUIET: "true"
+    RESULTS: ""
+    BRANCH: "all"
+    EXCLUDE_PATHS: "
+
 
 phases:
   pre_build:
@@ -38,7 +42,23 @@ phases:
 
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
- 
+        
+      - |
+
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        COMMAND="git file://."
+
+        ARGS=""
+        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+
 artifacts:
   files:
     - '**/*'
