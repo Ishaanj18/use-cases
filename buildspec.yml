@@ -7,7 +7,7 @@ env:
     QUIET: "true"
     RESULTS: ""
     BRANCH: "all"
-    EXCLUDE_PATHS: "
+    EXCLUDE_PATHS: ""
 
 
 phases:
