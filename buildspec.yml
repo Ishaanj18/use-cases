@@ -72,7 +72,7 @@ phases:
         [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type \"$DAST_SCAN_TYPE\""
 
         echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
-        eval accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast $ARGS
+        eval accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
 
 
 artifacts:
