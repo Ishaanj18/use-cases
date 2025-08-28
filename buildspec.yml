@@ -23,7 +23,7 @@ phases:
       - echo "Starting AccuKnox SAST scan"
   build:
     commands:
-      - echo "Running AccuKnox scan"
+      - echo "Running AccuKnox sast scan"
       - |
 
         if [ "$SOFT_FAIL" = "true" ]; then
@@ -35,7 +35,8 @@ phases:
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
 
       - |
-        
+      
+        echo "Running AccuKnox iac scan"
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
@@ -52,6 +53,8 @@ phases:
         
       - |
 
+        echo "Running AccuKnox secret scan"
+        
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
@@ -68,7 +71,9 @@ phases:
 
 
       - |
-      
+
+        echo "Running AccuKnox dast scan"
+        
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
@@ -83,6 +88,7 @@ phases:
 
       - |
 
+        echo "Running AccuKnox container scan"
         docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
         docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
 
