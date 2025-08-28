@@ -8,7 +8,9 @@ env:
     RESULTS: ""
     BRANCH: "all"
     EXCLUDE_PATHS: ""
-
+    TARGET_URL: "http://testasp.vulnweb.com/"
+    SEVERITY_THRESHOLD: "HIGH"
+    DAST_SCAN_TYPE: "baseline"
 
 phases:
   pre_build:
@@ -58,6 +60,20 @@ phases:
 
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+
+
+      - |
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        ARGS="--target-url \"$TARGET_URL\""
+        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold \"$SEVERITY_THRESHOLD\""
+        [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type \"$DAST_SCAN_TYPE\""
+
+        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
+        eval accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast $ARGS
+
 
 artifacts:
   files:
