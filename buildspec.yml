@@ -27,7 +27,7 @@ phases:
       - |
 
         if [ "$SOFT_FAIL" = "true" ]; then
-          #SOFT_FAIL_ARG="--softfail"
+          SOFT_FAIL_ARG="--softfail"
         fi
         echo "Installing AccuKnox scanner..."
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
