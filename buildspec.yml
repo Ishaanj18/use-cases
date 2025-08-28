@@ -1,6 +1,7 @@
 version: 0.2  
 env:
-  SOFT_FAIL:"true"
+  variables:
+    SOFT_FAIL: "true"
 phases:
   pre_build:
     commands:
