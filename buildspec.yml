@@ -1,4 +1,6 @@
 version: 0.2  
+env:
+  SOFT_FAIL=true
 phases:
   pre_build:
     commands:
@@ -7,7 +9,6 @@ phases:
     commands:
       - echo "Running AccuKnox scan"
       - |
-        export SOFT_FAIL=true
 
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
@@ -16,7 +17,6 @@ phases:
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
         echo "Running SAST scan..."
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
-
         
 artifacts:
   files:
