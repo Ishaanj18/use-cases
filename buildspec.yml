@@ -15,7 +15,7 @@ env:
     IMAGE_TAG: "test"
     IMAGE_TAR: "image.tar"
     SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
-    SCAN_IMAGE: "956994857092.dkr.ecr.us-east-1.amazonaws.com/aquasec/trivy:0.65.0"
+    SCAN_IMAGE: "public.ecr.aws/k9v9d5v2/aquasec/trivy:0.65.0"
 
 phases:
   pre_build:
