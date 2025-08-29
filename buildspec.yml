@@ -15,7 +15,7 @@ env:
     IMAGE_TAG: "test"
     IMAGE_TAR: "image.tar"
     SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
-    SCAN_IMAGE: "public.ecr.aws/k9v9d5v2/zaproxy/zap-stable:2.16.1"
+    SCAN_IMAGE: "public.ecr.aws/k9v9d5v2/trufflesecurity/trufflehog:3.90.3"
 
 phases:
   pre_build:
@@ -51,41 +51,41 @@ phases:
       #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
         
-      # - |
-
-      #   echo "Running AccuKnox secret scan"
-        
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-
-      #   COMMAND="git file://."
-
-      #   ARGS=""
-      #   [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
-      #   [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
-      #   [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
-
-      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-
-
       - |
 
-        echo "Running AccuKnox dast scan"
+        echo "Running AccuKnox secret scan"
         
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
 
-        ARGS="--target-url $TARGET_URL"
-        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
-        [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
+        COMMAND="git file://."
 
-        pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        ARGS=""
+        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+
+
+      # - |
+
+      #   echo "Running AccuKnox dast scan"
+        
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+
+      #   ARGS="--target-url $TARGET_URL"
+      #   [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
+      #   [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
+
+      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+      #   echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
 
 
       # - |
