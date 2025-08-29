@@ -103,6 +103,7 @@ phases:
         [ -n "$TAG" ] && CMD="image $IMAGE_NAME:$TAG"
         [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
 
+        pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
 
