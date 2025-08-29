@@ -78,9 +78,9 @@ phases:
           SOFT_FAIL_ARG="--softfail"
         fi
 
-        ARGS="--target-url \"$TARGET_URL\""
-        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold \"$SEVERITY_THRESHOLD\""
-        [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type \"$DAST_SCAN_TYPE\""
+        ARGS="--target-url $TARGET_URL"
+        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
+        [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
 
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
         echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
