@@ -70,42 +70,42 @@ phases:
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
 
-      # - |
-
-      #   echo "Running AccuKnox dast scan"
-        
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-
-      #   ARGS="--target-url \"$TARGET_URL\""
-      #   [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold \"$SEVERITY_THRESHOLD\""
-      #   [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type \"$DAST_SCAN_TYPE\""
-
-      #   echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-
-
       - |
 
-        echo "Running AccuKnox container scan"
-        docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
-        docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
-
-        docker load -i $IMAGE_TAR
-
-
+        echo "Running AccuKnox dast scan"
+        
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
 
-        CMD="image $IMAGE_NAME"
-        [ -n "$TAG" ] && CMD="image $IMAGE_NAME:$TAG"
-        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+        ARGS="--target-url \"$TARGET_URL\""
+        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold \"$SEVERITY_THRESHOLD\""
+        [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type \"$DAST_SCAN_TYPE\""
 
-        pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+
+
+      # - |
+
+      #   echo "Running AccuKnox container scan"
+      #   docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
+      #   docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
+
+      #   docker load -i $IMAGE_TAR
+
+
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+
+      #   CMD="image $IMAGE_NAME"
+      #   [ -n "$TAG" ] && CMD="image $IMAGE_NAME:$TAG"
+      #   [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+
+      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
 
 
 
