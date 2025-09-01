@@ -89,7 +89,6 @@ phases:
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast \
           --command "-t $TARGET_URL -I" \
           --severity-threshold "$SEVERITY_THRESHOLD" \
-          --dast-scan-type "$DAST_SCAN_TYPE" \
           --container-mode
 
 
