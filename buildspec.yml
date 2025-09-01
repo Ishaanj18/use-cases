@@ -78,6 +78,7 @@ phases:
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
+        export DEBUG=TRUE
 
         # ARGS="--target-url $TARGET_URL"
         # [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
