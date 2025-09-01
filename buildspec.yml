@@ -88,8 +88,7 @@ phases:
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast \
           --command "$TARGET_URL" \
-          --severity-threshold "$SEVERITY_THRESHOLD" \
-          --container-mode
+          --severity-threshold "$SEVERITY_THRESHOLD"
 
 
       # - |
