@@ -87,7 +87,7 @@ phases:
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
         echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -J results.json -I" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -I" --container-mode
 
 
       # - |
