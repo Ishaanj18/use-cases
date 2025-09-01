@@ -11,7 +11,7 @@ env:
     TARGET_URL: "http://testasp.vulnweb.com/"
     SEVERITY_THRESHOLD: "HIGH"
     DAST_SCAN_TYPE: "baseline"
-    IMAGE_NAME: "gitlab"
+    IMAGE: "gitlab"
     IMAGE_TAG: "test"
     IMAGE_TAR: "image.tar"
     SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
@@ -103,7 +103,7 @@ phases:
         fi
 
         CMD="image $IMAGE_NAME"
-        [ -n "$TAG" ] && CMD="image $IMAGE_NAME:$TAG"
+        [ -n "$TAG" ] && CMD="image $IMAGE:$TAG"
         [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
 
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
