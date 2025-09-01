@@ -73,7 +73,7 @@ phases:
 
       - |
 
-        rm -rf results.json
+  
         echo "Running AccuKnox dast scan"
         
         if [ "$SOFT_FAIL" = "true" ]; then
