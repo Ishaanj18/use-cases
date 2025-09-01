@@ -1,53 +1,118 @@
-version: 0.2
-
+version: 0.2  
 env:
   variables:
-    ECR_REGISTRY: "public.ecr.aws/k9v9d5v2"
-    REGION: "us-east-1"
+    SOFT_FAIL: "true"
+    DIRECTORY: "."
+    COMPACT: "true"
+    QUIET: "true"
+    RESULTS: ""
+    BRANCH: "all"
+    EXCLUDE_PATHS: ""
+    TARGET_URL: "http://testasp.vulnweb.com/"
+    SEVERITY_THRESHOLD: "HIGH"
+    DAST_SCAN_TYPE: "baseline"
+    IMAGE: "gitlab"
+    IMAGE_TAG: "test"
+    IMAGE_TAR: "image.tar"
+    SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+    SCAN_IMAGE: "public.ecr.aws/k9v9d5v2/zaproxy/zap-stable:2.16.1"
 
 phases:
   pre_build:
     commands:
-      - echo "Starting multi-architecture image compatibility tests"
-      - echo "Build environment architecture - $(uname -m)"
-      - echo "Authenticating with ECR..."
-      - aws ecr-public get-login-password --region $REGION | docker login --username AWS --password-stdin public.ecr.aws
-
+      - echo "Starting AccuKnox SAST scan"
   build:
     commands:
-      - echo "Testing AccuKnox scanner image compatibility..."
-      - echo "Testing bridgecrew/checkov:3.2.458"
-      - docker pull $ECR_REGISTRY/bridgecrew/checkov:3.2.458
-      - docker run --rm $ECR_REGISTRY/bridgecrew/checkov:3.2.458 --version || echo "Checkov version check completed"
-      - docker rmi $ECR_REGISTRY/bridgecrew/checkov:3.2.458
-      
-      - echo "Testing accuknox/opengrepjob:0.1.0"
-      - docker pull $ECR_REGISTRY/accuknox/opengrepjob:0.1.0
-      - docker run --rm --entrypoint="" $ECR_REGISTRY/accuknox/opengrepjob:0.1.0 echo "OpenGrep container working"
-      - docker rmi $ECR_REGISTRY/accuknox/opengrepjob:0.1.0
-      
-      - echo "Testing sonarsource/sonar-scanner-cli:11.4"
-      - docker pull $ECR_REGISTRY/sonarsource/sonar-scanner-cli:11.4
-      - docker run --rm $ECR_REGISTRY/sonarsource/sonar-scanner-cli:11.4 --version || echo "SonarScanner version check completed"
-      - docker rmi $ECR_REGISTRY/sonarsource/sonar-scanner-cli:11.4
-      
-      - echo "Testing zaproxy/zap-stable:2.16.1"
-      - docker pull $ECR_REGISTRY/zaproxy/zap-stable:2.16.1
-      - docker run --rm $ECR_REGISTRY/zaproxy/zap-stable:2.16.1 zap-baseline.py --help || echo "ZAP help check completed"
-      - docker rmi $ECR_REGISTRY/zaproxy/zap-stable:2.16.1
-      
-      - echo "Testing trufflesecurity/trufflehog:3.90.3"
-      - docker pull $ECR_REGISTRY/trufflesecurity/trufflehog:3.90.3
-      - docker run --rm $ECR_REGISTRY/trufflesecurity/trufflehog:3.90.3 --version || echo "TruffleHog version check completed"
-      - docker rmi $ECR_REGISTRY/trufflesecurity/trufflehog:3.90.3
-      
-      - echo "Testing aquasec/trivy:0.65.0"
-      - docker pull $ECR_REGISTRY/aquasec/trivy:0.65.0
-      - docker run --rm $ECR_REGISTRY/aquasec/trivy:0.65.0 --version || echo "Trivy version check completed"
-      - docker rmi $ECR_REGISTRY/aquasec/trivy:0.65.0
+      # - echo "Running AccuKnox sast scan"
+      # - |
 
-  post_build:
-    commands:
-      - echo "All multi-architecture images tested successfully!"
-      - echo "AccuKnox scanner will work on this build environment"
-      - echo "Images are compatible with $(uname -m) architecture"
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+      #   echo "Installing AccuKnox scanner..."
+      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+      #   echo "Running SAST scan..."
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
+
+      # - |
+      
+      #   echo "Running AccuKnox iac scan"
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+      #   CMD_ARGS=""
+      #   [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
+      #   [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+      #   [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
+      #   [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+      #   [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
+
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+        
+      # - |
+
+      #   echo "Running AccuKnox secret scan"
+        
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+
+      #   COMMAND="git file://."
+
+      #   ARGS=""
+      #   [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+      #   [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+      #   [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
+      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+
+
+      - |
+
+        echo "Running AccuKnox dast scan"
+        
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        # ARGS="--target-url $TARGET_URL"
+        # [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
+        # [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
+
+        pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t http://testasp.vulnweb.com/ -I" --container-mode
+
+
+      # - |
+
+      #   echo "Running AccuKnox container scan"
+      #   docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
+      #   docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
+
+      #   docker load -i $IMAGE_TAR
+
+
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+
+      #   CMD="image $IMAGE_NAME"
+      #   [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
+      #   [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+
+      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+
+
+
+artifacts:
+  files:
+    - '**/*'
+    - $IMAGE_TAR
