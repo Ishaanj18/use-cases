@@ -103,7 +103,7 @@ phases:
         fi
 
         CMD="image $IMAGE_NAME"
-        [ -n "$TAG" ] && CMD="image $IMAGE:$TAG"
+        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
         [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
 
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
