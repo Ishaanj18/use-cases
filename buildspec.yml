@@ -73,15 +73,13 @@ phases:
 
       - |
 
-        sudo rm -rf results.json
         echo "Running AccuKnox dast scan"
         
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
         export DEBUG=TRUE
-        mkdir -p /zap/wrk
-        chmod -R 777 /zap/wrk
+  
         # ARGS="--target-url $TARGET_URL"
         # [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
         # [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
