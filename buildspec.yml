@@ -79,7 +79,9 @@ phases:
           SOFT_FAIL_ARG="--softfail"
         fi
         export DEBUG=TRUE
-  
+        mkdir /tmp/scan-dir
+        find . -path './process' -prune -o -type f -print | cpio -pdm /tmp/scan-dir
+        cd /tmp/scan-dir
         # ARGS="--target-url $TARGET_URL"
         # [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
         # [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
