@@ -34,7 +34,7 @@ phases:
       #   echo "Running SAST scan..."
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
 
-      # - |
+      - |
       
         echo "Running AccuKnox iac scan"
         if [ "$SOFT_FAIL" = "true" ]; then
