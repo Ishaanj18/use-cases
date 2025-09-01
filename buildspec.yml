@@ -21,6 +21,10 @@ phases:
   pre_build:
     commands:
       - echo "Starting AccuKnox SAST scan"
+      - mkdir -p ./zap-workdir
+      - chmod 777 ./zap-workdir
+    # Set environment variable for ZAP to use this directory
+      - export ZAP_WORK_DIR=$(pwd)/zap-workdir
   build:
     commands:
       # - echo "Running AccuKnox sast scan"
@@ -89,7 +93,7 @@ phases:
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
         echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -J results.json -I" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -J ./zap-workdir -J ./zap-workdir/results.json -I" --container-mode
 
 
       # - |
