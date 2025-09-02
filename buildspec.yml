@@ -113,11 +113,10 @@ phases:
 
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-
+        cd -
 
       - |
         echo "Current directory: $(pwd)"
-        cd / 
         echo "newwww Current directory: $(pwd)"
         echo "Running AccuKnox container scan"
         docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
