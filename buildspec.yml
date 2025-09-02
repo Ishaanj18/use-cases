@@ -57,63 +57,63 @@ phases:
       #   echo "Running SAST scan..."
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
 
-      - |
+      # - |
       
-        echo "Running AccuKnox iac scan"
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
+      #   echo "Running AccuKnox iac scan"
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
 
         
-        CMD_ARGS=""
-        [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
-        [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
-        [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
-        [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
-        [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
+      #   CMD_ARGS=""
+      #   [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
+      #   [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+      #   [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
+      #   [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+      #   [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
 
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
         
-      - |
+      # - |
 
-        echo "Running AccuKnox secret scan"
+      #   echo "Running AccuKnox secret scan"
         
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
 
-        COMMAND="git file://."
+      #   COMMAND="git file://."
 
-        ARGS=""
-        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
-        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
-        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+      #   ARGS=""
+      #   [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+      #   [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+      #   [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
 
         
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
 
-      - |
+      # - |
 
-        echo "Running AccuKnox dast scan"
-        mkdir /tmp/scan-dir
-        chmod 777 /tmp/scan-dir
-        cd /tmp/scan-dir
+      #   echo "Running AccuKnox dast scan"
+      #   mkdir /tmp/scan-dir
+      #   chmod 777 /tmp/scan-dir
+      #   cd /tmp/scan-dir
         
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
-        export DEBUG=TRUE
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+      #   export DEBUG=TRUE
   
-        ARGS="--target-url $TARGET_URL"
-        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
-        [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
+      #   ARGS="--target-url $TARGET_URL"
+      #   [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
+      #   [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
 
         
       
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -I" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -I" --container-mode
 
 
       - |
