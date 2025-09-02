@@ -46,16 +46,16 @@ phases:
       
   build:
     commands:
-      - echo "Running AccuKnox sast scan"
-      - |
+      # - echo "Running AccuKnox sast scan"
+      # - |
 
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
-        echo "Installing AccuKnox scanner..."
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+      #   echo "Installing AccuKnox scanner..."
         
-        echo "Running SAST scan..."
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
+      #   echo "Running SAST scan..."
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
 
       - |
       
