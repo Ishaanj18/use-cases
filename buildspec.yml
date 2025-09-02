@@ -117,7 +117,8 @@ phases:
 
       - |
         echo "Current directory: $(pwd)"
-        cd /
+        cd / 
+        echo "newwww Current directory: $(pwd)"
         echo "Running AccuKnox container scan"
         docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
         docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
