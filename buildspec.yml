@@ -107,7 +107,7 @@ phases:
         fi
         export DEBUG=TRUE
   
-        ARGS="DAST_SCAN_SCRIPT -t $TARGET_URL -I "
+        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
         [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
 
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
