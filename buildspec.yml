@@ -2,74 +2,97 @@ version: 0.2
 env:
   variables:
     SOFT_FAIL: "true"
+    
+    ### ---------------- IAC INPUTS START ----------------------- ###
     DIRECTORY: "."
     COMPACT: "true"
     QUIET: "true"
+    ### ---------------- IAC INPUTS END ----------------------- ###  
+    
+
+    ###-------------------------------- SECRET: START --------------------------------###
+    
     RESULTS: ""
     BRANCH: "all"
     EXCLUDE_PATHS: ""
+
+    ###-------------------------------- SECRET: END --------------------------------###
+
+
+    ###-------------------------------- DAST: START --------------------------------###
+
     TARGET_URL: "http://testasp.vulnweb.com/"
     SEVERITY_THRESHOLD: "HIGH"
     DAST_SCAN_TYPE: "baseline"
+    SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+
+    ###-------------------------------- DAST: END --------------------------------###
+
+
+
+    ###-------------------------------- CONTAINER: START --------------------------------###
+
     IMAGE: "gitlab"
     IMAGE_TAG: "test"
     IMAGE_TAR: "image.tar"
-    SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
-    SCAN_IMAGE: "public.ecr.aws/k9v9d5v2/zaproxy/zap-stable:2.16.1"
+
+    ###-------------------------------- CONTAINER: END --------------------------------###
+
 
 phases:
   pre_build:
     commands:
-    # Set environment variable for ZAP to use this directory
-      - export ZAP_WORK_DIR=$(pwd)/zap-workdir
+      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.12.1/accuknox_aspm_scanner-0.12.1-py3-none-any.whl --break-system-packages
+      
   build:
     commands:
-      # - echo "Running AccuKnox sast scan"
-      # - |
+      - echo "Running AccuKnox sast scan"
+      - |
 
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-      #   echo "Installing AccuKnox scanner..."
-      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-      #   echo "Running SAST scan..."
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+        echo "Installing AccuKnox scanner..."
+        
+        echo "Running SAST scan..."
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast 
 
-      # - |
+      - |
       
-      #   echo "Running AccuKnox iac scan"
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-      #   CMD_ARGS=""
-      #   [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
-      #   [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
-      #   [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
-      #   [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
-      #   [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
+        echo "Running AccuKnox iac scan"
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
 
-      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
         
-      # - |
+        CMD_ARGS=""
+        [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
+        [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+        [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
+        [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+        [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
 
-      #   echo "Running AccuKnox secret scan"
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
         
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
+      - |
 
-      #   COMMAND="git file://."
+        echo "Running AccuKnox secret scan"
+        
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
 
-      #   ARGS=""
-      #   [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
-      #   [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
-      #   [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+        COMMAND="git file://."
 
-      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        ARGS=""
+        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
+        
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
 
       - |
@@ -84,35 +107,35 @@ phases:
         fi
         export DEBUG=TRUE
   
-        # ARGS="--target-url $TARGET_URL"
-        # [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
-        # [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
+        ARGS="--target-url $TARGET_URL"
+        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
+        [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
 
-        pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
+        
       
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -I" --container-mode
 
 
-      # - |
+      - |
 
-      #   echo "Running AccuKnox container scan"
-      #   docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
-      #   docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
+        echo "Running AccuKnox container scan"
+        docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
+        docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
 
-      #   docker load -i $IMAGE_TAR
+        docker load -i $IMAGE_TAR
 
 
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
 
-      #   CMD="image $IMAGE_NAME"
-      #   [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
-      #   [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+        CMD="image $IMAGE_NAME"
+        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
+        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
 
-      #   pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
 
 
 
