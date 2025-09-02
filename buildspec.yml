@@ -97,7 +97,7 @@ phases:
 
 
       - |
-
+        echo "Previous directory: $(pwd)"
         echo "Running AccuKnox dast scan"
         mkdir /tmp/scan-dir
         chmod 777 /tmp/scan-dir
