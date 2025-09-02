@@ -21,9 +21,9 @@ env:
 
     ###-------------------------------- DAST: START --------------------------------###
 
-    TARGET_URL: "http://testasp.vulnweb.com/"
+    TARGET_URL: "https://juice-shop.herokuapp.com/"
     SEVERITY_THRESHOLD: "HIGH"
-    DAST_SCAN_TYPE: "baseline"
+    DAST_SCAN_SCRIPT: "zap-basline.py"
     SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
 
     ###-------------------------------- DAST: END --------------------------------###
@@ -95,25 +95,22 @@ phases:
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
 
-      # - |
+      - |
 
-      #   echo "Running AccuKnox dast scan"
-      #   mkdir /tmp/scan-dir
-      #   chmod 777 /tmp/scan-dir
-      #   cd /tmp/scan-dir
+        echo "Running AccuKnox dast scan"
+        mkdir /tmp/scan-dir
+        chmod 777 /tmp/scan-dir
+        cd /tmp/scan-dir
         
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-      #   export DEBUG=TRUE
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+        export DEBUG=TRUE
   
-      #   ARGS="--target-url $TARGET_URL"
-      #   [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
-      #   [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
-
-        
+        ARGS="DAST_SCRIPT_TYPE -t $TARGET_URL -I "
+        [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
       
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -I" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
 
 
       - |
