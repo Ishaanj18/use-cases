@@ -96,23 +96,23 @@ phases:
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
 
-      # - |
+      - |
 
-      #   echo "Running AccuKnox dast scan"
-      #   mkdir /tmp/scan-dir
-      #   chmod 777 /tmp/scan-dir
-      #   cd /tmp/scan-dir
+        echo "Running AccuKnox dast scan"
+        mkdir /tmp/scan-dir
+        chmod 777 /tmp/scan-dir
+        cd /tmp/scan-dir
         
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-      #   export DEBUG=TRUE
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+        export DEBUG=TRUE
   
-      #   ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
-      #   #[ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
+        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
+        #[ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
 
-      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
 
 
       - |
