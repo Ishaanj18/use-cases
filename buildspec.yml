@@ -20,9 +20,6 @@ env:
 phases:
   pre_build:
     commands:
-      - echo "Starting AccuKnox SAST scan"
-      - mkdir -p ./zap-workdir
-      - chmod 777 ./zap-workdir
     # Set environment variable for ZAP to use this directory
       - export ZAP_WORK_DIR=$(pwd)/zap-workdir
   build:
@@ -78,22 +75,22 @@ phases:
       - |
 
         echo "Running AccuKnox dast scan"
+        mkdir /tmp/scan-dir
+        chmod 777 /tmp/scan-dir
+        cd /tmp/scan-dir
         
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
         export DEBUG=TRUE
-        mkdir /tmp/scan-dir
-        find . -path './process' -prune -o -type f -print | cpio -pdm /tmp/scan-dir
-        cd /tmp/scan-dir
+  
         # ARGS="--target-url $TARGET_URL"
         # [ -n "$SEVERITY_THRESHOLD" ] && ARGS="$ARGS --severity-threshold $SEVERITY_THRESHOLD"
         # [ -n "$DAST_SCAN_TYPE" ] && ARGS="$ARGS --dast-scan-type $DAST_SCAN_TYPE"
 
         pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.10.1/accuknox_aspm_scanner-0.10.1-py3-none-any.whl --break-system-packages
-        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG  dast $ARGS"
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -J ./zap-workdir -J ./zap-workdir/results.json -I" --container-mode
+      
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "zap-baseline.py -t https://juice-shop.herokuapp.com/ -I" --container-mode
 
 
       # - |
