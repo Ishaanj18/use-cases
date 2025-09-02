@@ -55,6 +55,7 @@ phases:
         echo "Installing AccuKnox scanner..."
         
         echo "Running SAST scan..."
+        scanner tool install --type sast
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast --command "scan ."
 
       - |
