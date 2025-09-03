@@ -97,7 +97,7 @@ phases:
 
 
       - |
-        echo "Previous directory: $(pwd)"
+      
         echo "Running AccuKnox dast scan"
         mkdir /tmp/scan-dir
         chmod 777 /tmp/scan-dir
@@ -115,8 +115,7 @@ phases:
         cd -
 
       - |
-        echo "Current directory: $(pwd)"
-        echo "newwww Current directory: $(pwd)"
+       
         echo "Running AccuKnox container scan"
         docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
         docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
