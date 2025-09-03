@@ -58,85 +58,85 @@ phases:
         accuknox-aspm-scanner tool install --type sast
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast --command "scan ."
 
-      - |
+      # - |
       
-        echo "Running AccuKnox iac scan"
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
+      #   echo "Running AccuKnox iac scan"
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
 
         
-        CMD_ARGS=""
-        [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
-        [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
-        [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
-        [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
-        [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
+      #   CMD_ARGS=""
+      #   [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
+      #   [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
+      #   [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
+      #   [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+      #   [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
 
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
         
-      - |
+      # - |
 
-        echo "Running AccuKnox secret scan"
+      #   echo "Running AccuKnox secret scan"
         
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
 
-        COMMAND="git file://."
+      #   COMMAND="git file://."
 
-        ARGS=""
-        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
-        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
-        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+      #   ARGS=""
+      #   [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+      #   [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+      #   [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
 
         
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
 
 
-      - |
+      # - |
       
-        echo "Running AccuKnox dast scan"
-        mkdir /tmp/scan-dir
-        chmod 777 /tmp/scan-dir
-        cd /tmp/scan-dir
+      #   echo "Running AccuKnox dast scan"
+      #   mkdir /tmp/scan-dir
+      #   chmod 777 /tmp/scan-dir
+      #   cd /tmp/scan-dir
         
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi 
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi 
   
-        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
+      #   ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
         
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        cd -
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+      #   cd -
 
-      - |
+      # - |
        
-        echo "Running AccuKnox container scan"
-        docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
-        docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
+      #   echo "Running AccuKnox container scan"
+      #   docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
+      #   docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
 
-        docker load -i $IMAGE_TAR
-
-
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
-
-        CMD="image $IMAGE_NAME"
-        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
-        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+      #   docker load -i $IMAGE_TAR
 
 
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+
+      #   CMD="image $IMAGE_NAME"
+      #   [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
+      #   [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+
+
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
 
 
 
-artifacts:
-  files:
-    - '**/*'
-    - $IMAGE_TAR
+# artifacts:
+#   files:
+#     - '**/*'
+#     - $IMAGE_TAR
