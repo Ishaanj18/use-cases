@@ -136,7 +136,7 @@ phases:
 
 
 
-# artifacts:
-#   files:
-#     - '**/*'
-#     - $IMAGE_TAR
+artifacts:
+  files:
+    - '**/*'
+    - $IMAGE_TAR
