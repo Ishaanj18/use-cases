@@ -46,17 +46,17 @@ phases:
       
   build:
     commands:
-      - echo "Running AccuKnox sast scan"
-      - |
+      # - echo "Running AccuKnox sast scan"
+      # - |
 
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi
-        echo "Installing AccuKnox scanner..."
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi
+      #   echo "Installing AccuKnox scanner..."
         
-        echo "Running SAST scan..."
-        accuknox-aspm-scanner tool install --type sast
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast --command "scan ."
+      #   echo "Running SAST scan..."
+      #   accuknox-aspm-scanner tool install --type sast
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG sast --command "scan ."
 
       # - |
       
@@ -113,26 +113,26 @@ phases:
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
       #   cd -
 
-      # - |
+      - |
        
-      #   echo "Running AccuKnox container scan"
-      #   docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
-      #   docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
+        echo "Running AccuKnox container scan"
+        docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
+        docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
 
-      #   docker load -i $IMAGE_TAR
-
-
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-
-      #   CMD="image $IMAGE_NAME"
-      #   [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
-      #   [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+        docker load -i $IMAGE_TAR
 
 
-      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        CMD="image $IMAGE_NAME"
+        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
+        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+
+
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
 
 
 
