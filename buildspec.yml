@@ -105,8 +105,7 @@ phases:
         
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
-        fi
-        export DEBUG=TRUE
+        fi 
   
         ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
         
