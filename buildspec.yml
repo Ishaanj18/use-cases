@@ -3,9 +3,9 @@ version: 0.2
 env:
   variables:
     SOFT_FAIL: "true"
-    IMAGE: "gitlab"
-    IMAGE_TAG: "test"
-    IMAGE_TAR: "image.tar"
+    TARGET_URL: "https://juice-shop.herokuapp.com/"
+    DAST_SCAN_SCRIPT: "zap-baseline.py"
+  
 
 phases:
   pre_build:
@@ -17,24 +17,18 @@ phases:
     commands:
         
       - |
-        echo "Running AccuKnox container scan"
-        docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
-        docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
-
-        docker load -i $IMAGE_TAR
-
+        echo "Running AccuKnox dast scan"
+        mkdir /tmp/scan-dir
+        chmod 777 /tmp/scan-dir
+        cd /tmp/scan-dir
+        
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
-        fi
-
-        CMD="image $IMAGE_NAME"
-        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
-        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
-
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
+        fi 
+  
+        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
         
-artifacts:
-  files:
-    - '**/*'
-    - $IMAGE_TAR
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        cd -
+        
