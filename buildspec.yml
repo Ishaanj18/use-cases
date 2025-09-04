@@ -12,19 +12,19 @@ env:
 
     ###-------------------------------- SECRET: START --------------------------------###
     
-    # RESULTS: ""
-    # BRANCH: "all"
-    # EXCLUDE_PATHS: ""
+    RESULTS: ""
+    BRANCH: "all"
+    EXCLUDE_PATHS: ""
 
     ###-------------------------------- SECRET: END --------------------------------###
 
 
     ###-------------------------------- DAST: START --------------------------------###
 
-    TARGET_URL: "https://juice-shop.herokuapp.com/"
-    # SEVERITY_THRESHOLD: "HIGH"
-    DAST_SCAN_SCRIPT: "zap-baseline.py"
-    # SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+    # TARGET_URL: "https://juice-shop.herokuapp.com/"
+    # # SEVERITY_THRESHOLD: "HIGH"
+    # DAST_SCAN_SCRIPT: "zap-baseline.py"
+    # # SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
 
     ###-------------------------------- DAST: END --------------------------------###
 
@@ -76,42 +76,42 @@ phases:
       #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
       #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
         
-      # - |
-
-      #   echo "Running AccuKnox secret scan"
-        
-      #   if [ "$SOFT_FAIL" = "true" ]; then
-      #     SOFT_FAIL_ARG="--softfail"
-      #   fi
-
-      #   COMMAND="git file://."
-
-      #   ARGS=""
-      #   [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
-      #   [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
-      #   [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
-
-        
-      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-
-
       - |
-      
-        echo "Running AccuKnox dast scan"
-        mkdir /tmp/scan-dir
-        chmod 777 /tmp/scan-dir
-        cd /tmp/scan-dir
+
+        echo "Running AccuKnox secret scan"
         
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
-        fi 
-  
-        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
+        fi
+
+        COMMAND="git file://."
+
+        ARGS=""
+        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
         
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        cd -
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+
+
+      # - |
+      
+      #   echo "Running AccuKnox dast scan"
+      #   mkdir /tmp/scan-dir
+      #   chmod 777 /tmp/scan-dir
+      #   cd /tmp/scan-dir
+        
+      #   if [ "$SOFT_FAIL" = "true" ]; then
+      #     SOFT_FAIL_ARG="--softfail"
+      #   fi 
+  
+      #   ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
+        
+      #   echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+      #   accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+      #   cd -
 
       # - |
        
