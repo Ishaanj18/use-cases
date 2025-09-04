@@ -22,9 +22,9 @@ env:
     ###-------------------------------- DAST: START --------------------------------###
 
     TARGET_URL: "https://juice-shop.herokuapp.com/"
-    SEVERITY_THRESHOLD: "HIGH"
+    # SEVERITY_THRESHOLD: "HIGH"
     DAST_SCAN_SCRIPT: "zap-baseline.py"
-    SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+    # SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
 
     ###-------------------------------- DAST: END --------------------------------###
 
