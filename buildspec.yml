@@ -2,10 +2,9 @@ version: 0.2
 
 env:
   variables:
-    SOFT_FAIL: "true"
-    DIRECTORY: "."
-    COMPACT: "true"
-    QUIET: "true"
+    RESULTS: ""
+    BRANCH: "all"
+    EXCLUDE_PATHS: ""
   
 
 phases:
@@ -18,20 +17,20 @@ phases:
     commands:
         
       - |
-        echo "Running AccuKnox iac scan"
+        echo "Running AccuKnox secret scan"
+        
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
 
+        COMMAND="git file://."
+
+        ARGS=""
+        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
         
-        CMD_ARGS=""
-        [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
-        [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
-        [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
-        [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
-        [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
-
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
-
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
         
