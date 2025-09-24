@@ -2,9 +2,9 @@ version: 0.2
 
 env:
   variables:
-    RESULTS: ""
-    BRANCH: "all"
-    EXCLUDE_PATHS: ""
+    SOFT_FAIL: "true"
+    TARGET_URL: "https://juice-shop.herokuapp.com/"
+    DAST_SCAN_SCRIPT: "zap-baseline.py"
   
 
 phases:
@@ -17,20 +17,18 @@ phases:
     commands:
         
       - |
-        echo "Running AccuKnox secret scan"
+        echo "Running AccuKnox dast scan"
+        mkdir /tmp/scan-dir
+        chmod 777 /tmp/scan-dir
+        cd /tmp/scan-dir
         
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
-        fi
-
-        COMMAND="git file://."
-
-        ARGS=""
-        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
-        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
-        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
-
+        fi 
+  
+        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
         
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        cd -
         
