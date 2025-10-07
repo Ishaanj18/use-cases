@@ -1,15 +1,14 @@
 version: 2.1
 
-jobs:
-  hello:
-    docker:
-      - image: cimg/base:current
-    steps:
-      - checkout
-      - run:
-          command: "echo Hello, World!"
+orbs:
+  accuknox-scan: accuknox/scan@1.0.0
 
 workflows:
-  say-hello-workflow:
+  accuknox:
     jobs:
-      - hello
+      - accuknox-scan/dast:
+          context: accuknox-context
+          TARGET_URL: "[http://testphp.vulnweb.com](http://testphp.vulnweb.com)"
+          DAST_SCAN_TYPE: "baseline"
+          SEVERITY_THRESHOLD: "High"
+          SOFT_FAIL: true
