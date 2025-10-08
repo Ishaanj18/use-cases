@@ -8,7 +8,7 @@ workflows:
     jobs:
       - accuknox-scan/dast:
           context: accuknox-context
-          SOFT_FAIL: "true"
+          SOFT_FAIL: true
           TARGET_URL: "https://juice-shop.herokuapp.com/"
           DAST_SCAN_SCRIPT: "zap-baseline.py"
           
