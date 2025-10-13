@@ -12,3 +12,4 @@ workflows:
           TARGET_URL: "https://juice-shop.herokuapp.com/"
           DAST_SCAN_SCRIPT: "zap-baseline.py"
           
+          
