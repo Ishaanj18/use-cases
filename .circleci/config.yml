@@ -7,7 +7,7 @@ workflows:
   accuknox:
     jobs:
       - accuknox-scan/sast:
-        context: accuknox-context
-        SOFT_FAIL: false
+          context: accuknox-context
+          SOFT_FAIL: "false"
           
           
