@@ -6,8 +6,8 @@ orbs:
 workflows:
   accuknox:
     jobs:
-      - accuknox-scan/sast:
+      - accuknox-scan/iac:
           context: accuknox-context
           SOFT_FAIL: false
           
-          
+        
