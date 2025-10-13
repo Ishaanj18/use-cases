@@ -6,7 +6,7 @@ orbs:
 workflows:
   accuknox:
     jobs:
-      - accuknox-scan/secret:
+      - accuknox-scan/container:
           context: accuknox-context
           SOFT_FAIL: false
           
