@@ -9,6 +9,5 @@ workflows:
       - accuknox-scan/sq-sast:
           context: accuknox-context
           SOFT_FAIL: false
-    
-          
+          SKIP_SONAR_SCAN: false
   
