@@ -6,11 +6,9 @@ orbs:
 workflows:
   accuknox:
     jobs:
-      - accuknox-scan/container:
+      - accuknox-scan/sq-sast:
           context: accuknox-context
           SOFT_FAIL: false
-          IMAGE: "gitlab"
-          IMAGE_TAG: "test"
-          IMAGE_TAR: "image.tar"
+    
           
     
