@@ -6,9 +6,10 @@ orbs:
 workflows:
   accuknox:
     jobs:
-      - accuknox-scan/dast:
+      - accuknox-scan/iac:
           context: accuknox-context
           SOFT_FAIL: true
-          TARGET_URL: "https://juice-shop.herokuapp.com/"
-          DAST_SCAN_SCRIPT: "zap-baseline.py"
-  
+          DIRECTORY: "."
+          COMPACT: "true"
+          QUIET: "true"
+    
