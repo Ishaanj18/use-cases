@@ -6,10 +6,10 @@ orbs:
 workflows:
   accuknox:
     jobs:
-      - accuknox-scan/iac:
+      - accuknox-scan/secret:
           context: accuknox-context
           SOFT_FAIL: true
-          DIRECTORY: "."
-          COMPACT: true
-          QUIET: true
+          RESULTS: ""
+          BRANCH: "all"
+          EXCLUDE_PATHS: ""
     
