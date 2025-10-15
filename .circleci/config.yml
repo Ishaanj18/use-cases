@@ -10,6 +10,6 @@ workflows:
           context: accuknox-context
           SOFT_FAIL: true
           DIRECTORY: "."
-          COMPACT: "true"
-          QUIET: "true"
+          COMPACT: true
+          QUIET: true
     
