@@ -8,8 +8,8 @@ workflows:
     jobs:
       - accuknox-scan/iac:
           context: accuknox-context
-          SOFT_FAIL: "true"
+          SOFT_FAIL: true
           DIRECTORY: "."
-          COMPACT: "true"
-          QUIET: "true"
-          FRAMEWORK: ""  
+          COMPACT: true
+          QUIET: true
+          FRAMEWORK: ""
