@@ -6,7 +6,7 @@ orbs:
 workflows:
   accuknox:
     jobs:
-      - accuknox-scan/sq-sast:
+      - accuknox-scan/dast:
           context: accuknox-context
-          SKIP_SONAR_SCAN: false
-          SOFT_FAIL: false
+          TARGET_URL: "https://juice-shop.herokuapp.com/"
+          DAST_SCAN_TYPE: "baseline"
