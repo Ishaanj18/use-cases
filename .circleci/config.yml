@@ -4,8 +4,32 @@ orbs:
   accuknox-scan: accuknox-scan-1/scan@dev:testing
 
 workflows:
-  accuknox:
+  test-all-scans:
     jobs:
       - accuknox-scan/sast:
           context: accuknox-context
           SOFT_FAIL: true
+      
+      - accuknox-scan/iac:
+          context: accuknox-context
+          SOFT_FAIL: true
+          DIRECTORY: "."
+          COMPACT: true
+          QUIET: true
+      
+      - accuknox-scan/dast:
+          context: accuknox-context
+          SOFT_FAIL: true
+          TARGET_URL: "https://juice-shop.herokuapp.com/"
+          DAST_SCAN_TYPE: "baseline"
+          SEVERITY_THRESHOLD: "HIGH"
+      
+      - accuknox-scan/secret:
+          context: accuknox-context
+          SOFT_FAIL: true
+          BRANCH: "all"
+      
+      - accuknox-scan/sq-sast:
+          context: accuknox-context
+          SOFT_FAIL: true
+          SKIP_SONAR_SCAN: true
