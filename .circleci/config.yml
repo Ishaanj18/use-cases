@@ -9,6 +9,5 @@ workflows:
       - accuknox-scan/container:
           context: accuknox-context
           SOFT_FAIL: true
-          IMAGE_NAME: "gitlab"
-          TAG: "test"
-          IMAGE_TAR: "image.tar"
+          DAST_SCAN_TYPE: "baseline"
+          TARGET_URL: "https://juice-shop.herokuapp.com/"
