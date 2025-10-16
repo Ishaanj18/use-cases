@@ -8,4 +8,4 @@ workflows:
     jobs:
       - accuknox-scan/sast:
           context: accuknox-context
-          SOFT_FAIL: "true"
+          SOFT_FAIL: true
