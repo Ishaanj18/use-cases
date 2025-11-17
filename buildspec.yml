@@ -4,8 +4,7 @@ env:
   variables:
     SOFT_FAIL: "true"
     TARGET_URL: "https://juice-shop.herokuapp.com/"
-    DAST_SCAN_SCRIPT: "zap-baseline.py"
-  
+    DAST_SCAN_TYPE: "baseline"  # Changed from DAST_SCAN_SCRIPT
 
 phases:
   pre_build:
@@ -15,20 +14,106 @@ phases:
       
   build:
     commands:
-        
       - |
         echo "Running AccuKnox dast scan"
         mkdir /tmp/scan-dir
         chmod 777 /tmp/scan-dir
         cd /tmp/scan-dir
         
+        # Determine maxDuration based on scan type
+        if [ "$DAST_SCAN_TYPE" = "full-scan" ]; then
+          SPIDER_DURATION=10
+        else
+          SPIDER_DURATION=1
+        fi
+        
+        # Create ZAP Automation Framework YAML config with traditional-json-plus
+        echo "Creating ZAP config with request/response support..."
+        cat > zap.yaml << EOF
+        env:
+          contexts:
+            - name: ctx
+              urls:
+                - $TARGET_URL
+          parameters:
+            failOnError: true
+            progressToStdout: false
+        jobs:
+          - type: passiveScan-config
+            parameters:
+              enableTags: false
+              maxAlertsPerRule: 10
+          - type: spider
+            parameters:
+              context: ctx
+              url: $TARGET_URL
+              maxDuration: $SPIDER_DURATION
+          - type: passiveScan-wait
+            parameters:
+              maxDuration: 0
+          - type: report
+            parameters:
+              template: traditional-json-plus
+              reportDir: /zap/wrk
+              reportFile: results.json
+              reportTitle: DAST Scanning Report
+        EOF
+        
+        echo "ZAP Automation Framework config created with traditional-json-plus template"
+        
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi 
-  
-        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
+
+        # Use Automation Framework with generated config
+        ARGS="zap.sh -cmd -autorun /zap/wrk/zap.yaml"
         
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        
+        # Display results.json at the end
+        echo "=========================================="
+        echo "DAST Scan Results (results.json):"
+        echo "=========================================="
+        if [ -f results.json ]; then
+          echo "✅ results.json found!"
+          echo "File size: $(du -h results.json | cut -f1)"
+          echo "File location: $(pwd)/results.json"
+          echo ""
+          echo "First 200 lines of results.json (preview):"
+          echo "------------------------------------------"
+          head -n 200 results.json | jq '.' 2>/dev/null || head -n 200 results.json
+          echo ""
+          echo "=========================================="
+          echo "📄 Full results.json available at: $(pwd)/results.json"
+          echo "To view full file, check the build artifacts or logs"
+        else
+          echo "❌ WARNING: results.json not found!"
+          echo "Listing files in scan directory:"
+          ls -lah
+        fi
         cd -
         
+  post_build:
+    commands:
+      - |
+        echo "=========================================="
+        echo "Post-Build: Copying results.json"
+        echo "=========================================="
+        if [ -f /tmp/scan-dir/results.json ]; then
+          # Copy results.json to workspace root for easy access
+          cp /tmp/scan-dir/results.json $CODEBUILD_SRC_DIR/results.json 2>/dev/null || cp /tmp/scan-dir/results.json ./results.json
+          echo "✅ results.json copied to workspace root"
+          echo "File location: $CODEBUILD_SRC_DIR/results.json"
+          echo ""
+          echo "Summary of results.json:"
+          cat results.json | jq '.site[0].alerts | length' 2>/dev/null && echo "alerts found" || echo "Could not parse JSON summary"
+        else
+          echo "⚠️  results.json not found in /tmp/scan-dir/"
+        fi
+
+artifacts:
+  files:
+    - results.json
+  name: dast-scan-results
+
