@@ -4,7 +4,7 @@ env:
   variables:
     SOFT_FAIL: "true"
     TARGET_URL: "https://juice-shop.herokuapp.com/"
-    DAST_SCAN_TYPE: "baseline"  # Changed from DAST_SCAN_SCRIPT
+    DAST_SCAN_TYPE: "baseline"  # Options: baseline | full-scan
 
 phases:
   pre_build:
@@ -15,105 +15,169 @@ phases:
   build:
     commands:
       - |
-        echo "Running AccuKnox dast scan"
-        mkdir /tmp/scan-dir
+        echo "Running AccuKnox DAST scan with $DAST_SCAN_TYPE configuration"
+        mkdir -p /tmp/scan-dir
         chmod 777 /tmp/scan-dir
         cd /tmp/scan-dir
         
-        # Determine maxDuration based on scan type
+        # Set variables based on scan type
         if [ "$DAST_SCAN_TYPE" = "full-scan" ]; then
-          SPIDER_DURATION=10
+          CONTEXT_NAME="fullscan"
+          SPIDER_DURATION=""  # No limit for full scan
+          SPIDER_PARAMS="parameters: {}"
+          AJAX_SPIDER="  - type: spiderAjax
+            parameters: {}
+            tests:
+            - name: At least 100 URLs found
+              type: stats
+              onFail: INFO
+              statistic: spiderAjax.urls.added
+              operator: '>='
+              value: 100"
+          PASSIVE_WAIT_PARAMS="parameters: {}"
+          ACTIVE_SCAN="  - type: activeScan
+            parameters: {}
+            policyDefinition: {}"
+          REPORT_DESC="Full Active Security Scan"
+          REPORT_TITLE="ZAP Full Scan Report"
+          SPIDER_TESTS="    tests:
+            - name: At least 100 URLs found
+              type: stats
+              onFail: INFO
+              statistic: automation.spider.urls.added
+              operator: '>='
+              value: 100"
         else
-          SPIDER_DURATION=1
+          CONTEXT_NAME="baseline"
+          SPIDER_DURATION="1"
+          SPIDER_PARAMS="parameters:
+              maxDuration: $SPIDER_DURATION
+              url: $TARGET_URL"
+          AJAX_SPIDER=""
+          PASSIVE_WAIT_PARAMS="parameters:
+              maxDuration: 0"
+          ACTIVE_SCAN=""
+          REPORT_DESC="Baseline Passive Security Scan"
+          REPORT_TITLE="ZAP Baseline Scan Report"
+          SPIDER_TESTS=""
         fi
         
-        # Create ZAP Automation Framework YAML config with traditional-json-plus
-        echo "Creating ZAP config with request/response support..."
+        # Build ZAP Automation Framework YAML
+        echo "Creating ZAP config for $DAST_SCAN_TYPE scan..."
         cat > zap.yaml << EOF
         env:
           contexts:
-            - name: ctx
-              urls:
-                - $TARGET_URL
+          - name: $CONTEXT_NAME
+            urls:
+            - $TARGET_URL
+            excludePaths: []
           parameters:
             failOnError: true
             progressToStdout: false
+        
         jobs:
+          # Passive scan configuration
           - type: passiveScan-config
             parameters:
               enableTags: false
               maxAlertsPerRule: 10
+          
+          # Spider
           - type: spider
-            parameters:
-              context: ctx
-              url: $TARGET_URL
-              maxDuration: $SPIDER_DURATION
+            $SPIDER_PARAMS
+        $SPIDER_TESTS
+          
+        $AJAX_SPIDER
+          
+          # Wait for passive scanning
           - type: passiveScan-wait
+            $PASSIVE_WAIT_PARAMS
+          
+        $ACTIVE_SCAN
+          
+          # Output summary
+          - type: outputSummary
             parameters:
-              maxDuration: 0
+              format: Long
+              summaryFile: /home/zap/zap_out.json
+            rules: []
+          
+          # Generate report
           - type: report
             parameters:
-              template: traditional-json-plus
-              reportDir: /zap/wrk
+              reportDescription: '$REPORT_DESC'
+              reportDir: /zap/wrk/
               reportFile: results.json
-              reportTitle: DAST Scanning Report
+              reportTitle: $REPORT_TITLE
+              template: traditional-json-plus
         EOF
         
-        echo "ZAP Automation Framework config created with traditional-json-plus template"
+        echo "=========================================="
+        echo "Generated zap.yaml ($DAST_SCAN_TYPE):"
+        echo "=========================================="
+        cat zap.yaml
+        echo "=========================================="
         
-        if [ "$SOFT_FAIL" = "true" ]; then
-          SOFT_FAIL_ARG="--softfail"
-        fi 
-
-        # Use Automation Framework with generated config
+        # Prepare scan command
+        SOFT_FAIL_ARG=""
+        [ "$SOFT_FAIL" = "true" ] && SOFT_FAIL_ARG="--softfail"
+        
         ARGS="zap.sh -cmd -autorun /zap/wrk/zap.yaml"
         
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
+        # Run ZAP scan
+        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command \"$ARGS\" --container-mode"
         accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
         
-        # Display results.json at the end
+        # Display results
         echo "=========================================="
-        echo "DAST Scan Results (results.json):"
+        echo "DAST Scan Results:"
         echo "=========================================="
         if [ -f results.json ]; then
           echo "✅ results.json found!"
           echo "File size: $(du -h results.json | cut -f1)"
           echo "File location: $(pwd)/results.json"
-          echo ""
-          echo "First 200 lines of results.json (preview):"
-          echo "------------------------------------------"
-          head -n 200 results.json | jq '.' 2>/dev/null || head -n 200 results.json
-          echo ""
-          echo "=========================================="
-          echo "📄 Full results.json available at: $(pwd)/results.json"
-          echo "To view full file, check the build artifacts or logs"
+          
+          if command -v jq &> /dev/null; then
+            echo ""
+            echo "Alert Summary:"
+            ALERT_COUNT=$(jq '.site[0].alerts | length' results.json 2>/dev/null)
+            [ -n "$ALERT_COUNT" ] && echo "Total alerts: $ALERT_COUNT"
+            echo ""
+            echo "Preview (first 200 lines):"
+            head -n 200 results.json | jq '.' 2>/dev/null || head -n 200 results.json
+          else
+            echo ""
+            echo "Preview (first 200 lines):"
+            head -n 200 results.json
+          fi
         else
           echo "❌ WARNING: results.json not found!"
-          echo "Listing files in scan directory:"
+          echo "Scan directory contents:"
           ls -lah
         fi
+        
         cd -
         
   post_build:
     commands:
       - |
         echo "=========================================="
-        echo "Post-Build: Copying results.json"
+        echo "Post-Build: Copying Results"
         echo "=========================================="
         if [ -f /tmp/scan-dir/results.json ]; then
-          # Copy results.json to workspace root for easy access
-          cp /tmp/scan-dir/results.json $CODEBUILD_SRC_DIR/results.json 2>/dev/null || cp /tmp/scan-dir/results.json ./results.json
+          cp /tmp/scan-dir/results.json ${CODEBUILD_SRC_DIR}/results.json 2>/dev/null || cp /tmp/scan-dir/results.json ./results.json
           echo "✅ results.json copied to workspace root"
-          echo "File location: $CODEBUILD_SRC_DIR/results.json"
-          echo ""
-          echo "Summary of results.json:"
-          cat results.json | jq '.site[0].alerts | length' 2>/dev/null && echo "alerts found" || echo "Could not parse JSON summary"
+          
+          if command -v jq &> /dev/null; then
+            ALERT_COUNT=$(jq '.site[0].alerts | length' results.json 2>/dev/null)
+            [ -n "$ALERT_COUNT" ] && echo "📊 Total alerts found: $ALERT_COUNT"
+          fi
         else
           echo "⚠️  results.json not found in /tmp/scan-dir/"
+          ls -lah /tmp/scan-dir/ 2>/dev/null || echo "Directory not found"
         fi
 
 artifacts:
   files:
     - results.json
   name: dast-scan-results
-
