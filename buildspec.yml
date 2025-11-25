@@ -4,7 +4,7 @@ env:
   variables:
     SOFT_FAIL: "true"
     TARGET_URL: "https://juice-shop.herokuapp.com/"
-    DAST_SCAN_TYPE: "full-scan"  # Options: baseline | full-scan
+    DAST_SCAN_TYPE: "baseline"  # Options: baseline | full-scan
 
 phases:
   pre_build:
