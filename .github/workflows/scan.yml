@@ -11,31 +11,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: "Run Accuknox SAST"
-        uses:  r3d-shadow/sast-scan-action@main
+      - name: "Run Accuknox SAST: Opengrep"
+        uses: accuknox/sast-scan-opengrep-action@v1.0.1
         with:
-          sonar_token: ${{ secrets.SONAR_CLOUD_TOKEN }}
-          sonar_host_url: "https://sonarcloud.io"
-          sonar_project_key: "r3d-shadow_azure-plugin-test"
-          sonar_organization_id: "r3d-shadow"
-          accuknox_endpoint: "cspm.demo.accuknox.com"
+          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
-          tenant_id: 3730
-          label: "SPOC"
-          input_soft_fail: true
-          skip_sonar_scan: true
-
-      # - name: "Run Accuknox SAST"
-      #   uses: accuknox/sast-scan-opengrep-action@1.0.0
-      #   with:
-      #     accuknox_endpoint: "cspm.demo.accuknox.com"
-      #     accuknox_tenant: 3730
-      #     accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
-      #     accuknox_label: "SPOC"
-      #     input_soft_fail: "true"
-      #     upload_artifact: false
+          accuknox_label: ${{ secrets.ACCUKNOX_LABEL }}
+          soft_fail: true
 
       #   - name: AccuKnox Secret Scan
       #     uses: accuknox/secret-scan-action@v1.0.1
