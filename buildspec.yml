@@ -63,3 +63,4 @@ artifacts:
   files:
     - '**/*'
     - $IMAGE_TAR
+    
