@@ -6,6 +6,9 @@ env:
     IMAGE: "nginx"
     IMAGE_TAG: "latest"
     IMAGE_TAR: "image.tar"
+    KEEP_RESULTS: "false"
+    GENERATE_SBOM: "true"
+    PROJECT_NAME: ""
 
 phases:
   pre_build:
@@ -19,14 +22,42 @@ phases:
         docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
         docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
         docker load -i $IMAGE_TAR
+        
+        # Process SOFT_FAIL
+        SOFT_FAIL_ARG=""
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
-        CMD="image $IMAGE_NAME"
+        
+        # Process KEEP_RESULTS
+        KEEP_RESULTS_ARG=""
+        if [ "$KEEP_RESULTS" = "true" ]; then
+          KEEP_RESULTS_ARG="--keep-results"
+        fi
+        
+        # Process GENERATE_SBOM
+        GENERATE_SBOM_ARG=""
+        if [ "$GENERATE_SBOM" = "true" ]; then
+          GENERATE_SBOM_ARG="--generate-sbom"
+          if [ -z "$PROJECT_NAME" ]; then
+            echo "ERROR: PROJECT_NAME is required when GENERATE_SBOM is true!"
+            exit 1
+          fi
+        fi
+        
+        # Build scan command
+        CMD="image $IMAGE"
         [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
         [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-        accuknox-aspm-scanner scan --project-name "my-app" $SOFT_FAIL_ARG container --command "$CMD" --container-mode --generate-sbom
+        
+        # Build project-name argument if SBOM is enabled
+        PROJECT_NAME_ARG=""
+        if [ "$GENERATE_SBOM" = "true" ] && [ -n "$PROJECT_NAME" ]; then
+          PROJECT_NAME_ARG="--project-name \"$PROJECT_NAME\""
+        fi
+        
+        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG"
+        eval accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG
 
 artifacts:
   files:
