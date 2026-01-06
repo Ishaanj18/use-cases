@@ -26,7 +26,7 @@ phases:
         [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
         [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
         echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG container --command "$CMD" --container-mode --generate-sbom
+        accuknox-aspm-scanner scan --project-name "my-app" $SOFT_FAIL_ARG container --command "$CMD" --container-mode --generate-sbom
 
 artifacts:
   files:
