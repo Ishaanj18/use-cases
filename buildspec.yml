@@ -8,7 +8,7 @@ env:
     IMAGE_TAR: "image.tar"
     KEEP_RESULTS: "false"
     GENERATE_SBOM: "true"
-    PROJECT_NAME: ""
+    PROJECT_NAME: "sbomtest"
 
 phases:
   pre_build:
