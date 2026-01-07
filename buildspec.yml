@@ -57,7 +57,7 @@ phases:
         fi
         
         echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG"
-        eval accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG
+        eval accuknox-aspm-scanner scan --keep-results $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG
 
 artifacts:
   files:
