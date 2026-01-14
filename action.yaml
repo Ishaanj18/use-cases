@@ -100,6 +100,12 @@ runs:
           KEEP_RESULTS_ARG="--keep-results"
         fi
 
+         # Build project name argument
+        PROJECT_NAME_ARG=""
+        if [ -n "$ACCUKNOX_PROJECT_NAME" ]; then
+          PROJECT_NAME_ARG="--project-name $ACCUKNOX_PROJECT_NAME"
+        fi
+
         # Build scan command dynamically
         CMD="image $IMAGE_NAME"
         [ -n "$TAG" ] && CMD="image $IMAGE_NAME:$TAG"
@@ -108,5 +114,5 @@ runs:
         [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
 
         echo "Running AccuKnox container scan:"
-        echo "./accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG"
-        ./accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG container --command "$CMD" --container-mode $GENERATE_SBOM_ARG
+        echo "./accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG"
+        ./accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command "$CMD" --container-mode $GENERATE_SBOM_ARG
