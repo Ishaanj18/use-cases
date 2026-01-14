@@ -1,0 +1,20 @@
+name: CDR Remediation
+on:
+  repository_dispatch:
+    types: [accuknox-webhook]
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    container:
+      image: public.ecr.aws/k9v9d5v2/cdr/accknox-cdr-remediation:latest
+      env:
+        CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+
+    steps:
+      - name: Accuknox CDR action
+        uses: ishaan/use-cases@main
+        with:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_DEV_ACCESS_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_DEV_SECRET_ID }}
+          

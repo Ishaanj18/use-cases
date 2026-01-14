@@ -3,182 +3,64 @@ version: 0.2
 env:
   variables:
     SOFT_FAIL: "true"
-    TARGET_URL: "https://juice-shop.herokuapp.com/"
-    DAST_SCAN_TYPE: "baseline"  # Options: baseline | full-scan
+    IMAGE: "nginx"
+    IMAGE_TAG: "latest"
+    IMAGE_TAR: "image.tar"
+    KEEP_RESULTS: "false"
+    GENERATE_SBOM: "true"
+    PROJECT_NAME: "sbomtest"
 
 phases:
   pre_build:
     commands:
       - echo "Installing AccuKnox ASPM scanner..."
-      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.13.8/accuknox_aspm_scanner-0.13.8-py3-none-any.whl --break-system-packages
-      
+      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.0/accuknox_aspm_scanner-0.14.0-py3-none-any.whl --break-system-packages
   build:
     commands:
       - |
-        echo "Running AccuKnox DAST scan with $DAST_SCAN_TYPE configuration"
-        mkdir -p /tmp/scan-dir
-        chmod 777 /tmp/scan-dir
-        cd /tmp/scan-dir
+        echo "Running AccuKnox container scan"
+        docker build -t $IMAGE:$IMAGE_TAG -f Dockerfile .
+        docker save -o $IMAGE_TAR $IMAGE:$IMAGE_TAG
+        docker load -i $IMAGE_TAR
         
-        # Set variables based on scan type
-        if [ "$DAST_SCAN_TYPE" = "full-scan" ]; then
-          CONTEXT_NAME="fullscan"
-          SPIDER_DURATION=""  # No limit for full scan
-          SPIDER_PARAMS="parameters: {}"
-          AJAX_SPIDER="  - type: spiderAjax
-            parameters: {}
-            tests:
-            - name: At least 100 URLs found
-              type: stats
-              onFail: INFO
-              statistic: spiderAjax.urls.added
-              operator: '>='
-              value: 100"
-          PASSIVE_WAIT_PARAMS="parameters: {}"
-          ACTIVE_SCAN="  - type: activeScan
-            parameters: {}
-            policyDefinition: {}"
-          REPORT_DESC="Full Active Security Scan"
-          REPORT_TITLE="ZAP Full Scan Report"
-          SPIDER_TESTS="    tests:
-            - name: At least 100 URLs found
-              type: stats
-              onFail: INFO
-              statistic: automation.spider.urls.added
-              operator: '>='
-              value: 100"
-        else
-          CONTEXT_NAME="baseline"
-          SPIDER_DURATION="1"
-          SPIDER_PARAMS="parameters:
-              maxDuration: $SPIDER_DURATION
-              url: $TARGET_URL"
-          AJAX_SPIDER=""
-          PASSIVE_WAIT_PARAMS="parameters:
-              maxDuration: 0"
-          ACTIVE_SCAN=""
-          REPORT_DESC="Baseline Passive Security Scan"
-          REPORT_TITLE="ZAP Baseline Scan Report"
-          SPIDER_TESTS=""
-        fi
-        
-        # Build ZAP Automation Framework YAML
-        echo "Creating ZAP config for $DAST_SCAN_TYPE scan..."
-        cat > zap.yaml << EOF
-        env:
-          contexts:
-          - name: $CONTEXT_NAME
-            urls:
-            - $TARGET_URL
-            excludePaths: []
-          parameters:
-            failOnError: true
-            progressToStdout: false
-        
-        jobs:
-          # Passive scan configuration
-          - type: passiveScan-config
-            parameters:
-              enableTags: false
-              maxAlertsPerRule: 10
-          
-          # Spider
-          - type: spider
-            $SPIDER_PARAMS
-        $SPIDER_TESTS
-          
-        $AJAX_SPIDER
-          
-          # Wait for passive scanning
-          - type: passiveScan-wait
-            $PASSIVE_WAIT_PARAMS
-          
-        $ACTIVE_SCAN
-          
-          # Output summary
-          - type: outputSummary
-            parameters:
-              format: Long
-              summaryFile: /home/zap/zap_out.json
-            rules: []
-          
-          # Generate report
-          - type: report
-            parameters:
-              reportDescription: '$REPORT_DESC'
-              reportDir: /zap/wrk/
-              reportFile: results.json
-              reportTitle: $REPORT_TITLE
-              template: traditional-json-plus
-        EOF
-        
-        echo "=========================================="
-        echo "Generated zap.yaml ($DAST_SCAN_TYPE):"
-        echo "=========================================="
-        cat zap.yaml
-        echo "=========================================="
-        
-        # Prepare scan command
+        # Process SOFT_FAIL
         SOFT_FAIL_ARG=""
-        [ "$SOFT_FAIL" = "true" ] && SOFT_FAIL_ARG="--softfail"
-        
-        ARGS="zap.sh -cmd -autorun /zap/wrk/zap.yaml"
-        
-        # Run ZAP scan
-        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command \"$ARGS\" --container-mode"
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        
-        # Display results
-        echo "=========================================="
-        echo "DAST Scan Results:"
-        echo "=========================================="
-        if [ -f results.json ]; then
-          echo "✅ results.json found!"
-          echo "File size: $(du -h results.json | cut -f1)"
-          echo "File location: $(pwd)/results.json"
-          
-          if command -v jq &> /dev/null; then
-            echo ""
-            echo "Alert Summary:"
-            ALERT_COUNT=$(jq '.site[0].alerts | length' results.json 2>/dev/null)
-            [ -n "$ALERT_COUNT" ] && echo "Total alerts: $ALERT_COUNT"
-            echo ""
-            echo "Preview (first 200 lines):"
-            head -n 200 results.json | jq '.' 2>/dev/null || head -n 200 results.json
-          else
-            echo ""
-            echo "Preview (first 200 lines):"
-            head -n 200 results.json
-          fi
-        else
-          echo "❌ WARNING: results.json not found!"
-          echo "Scan directory contents:"
-          ls -lah
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
         fi
         
-        cd -
-        
-  post_build:
-    commands:
-      - |
-        echo "=========================================="
-        echo "Post-Build: Copying Results"
-        echo "=========================================="
-        if [ -f /tmp/scan-dir/results.json ]; then
-          cp /tmp/scan-dir/results.json ${CODEBUILD_SRC_DIR}/results.json 2>/dev/null || cp /tmp/scan-dir/results.json ./results.json
-          echo "✅ results.json copied to workspace root"
-          
-          if command -v jq &> /dev/null; then
-            ALERT_COUNT=$(jq '.site[0].alerts | length' results.json 2>/dev/null)
-            [ -n "$ALERT_COUNT" ] && echo "📊 Total alerts found: $ALERT_COUNT"
-          fi
-        else
-          echo "⚠️  results.json not found in /tmp/scan-dir/"
-          ls -lah /tmp/scan-dir/ 2>/dev/null || echo "Directory not found"
+        # Process KEEP_RESULTS
+        KEEP_RESULTS_ARG=""
+        if [ "$KEEP_RESULTS" = "true" ]; then
+          KEEP_RESULTS_ARG="--keep-results"
         fi
-
+        
+        # Process GENERATE_SBOM
+        GENERATE_SBOM_ARG=""
+        if [ "$GENERATE_SBOM" = "true" ]; then
+          GENERATE_SBOM_ARG="--generate-sbom"
+          if [ -z "$PROJECT_NAME" ]; then
+            echo "ERROR: PROJECT_NAME is required when GENERATE_SBOM is true!"
+            exit 1
+          fi
+        fi
+        
+        # Build scan command
+        CMD="image $IMAGE"
+        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE:$IMAGE_TAG"
+        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+        
+        # Build project-name argument if SBOM is enabled
+        PROJECT_NAME_ARG=""
+        if [ "$GENERATE_SBOM" = "true" ] && [ -n "$PROJECT_NAME" ]; then
+          PROJECT_NAME_ARG="--project-name \"$PROJECT_NAME\""
+        fi
+        
+        echo "Running: accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG"
+        eval accuknox-aspm-scanner scan --keep-results $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG
 
 artifacts:
   files:
-    - results.json
-  name: dast-scan-results
+    - '**/*'
+    - $IMAGE_TAR
+    
