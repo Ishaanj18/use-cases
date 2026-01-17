@@ -20,7 +20,7 @@ jobs:
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
           accuknox_label: "evelabel"
           accuknox_endpoint: "cspm.dev.accuknox.com"
-          image_name: "nginx"
+          image_name: "alpine"
           tag: "latest"
           soft_fail: true
           generate_sbom: true
