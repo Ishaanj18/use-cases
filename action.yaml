@@ -112,6 +112,7 @@ runs:
         [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
         [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
         [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+        
 
         echo "Running AccuKnox container scan:"
         echo "./accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG"
