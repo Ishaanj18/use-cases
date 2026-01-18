@@ -22,6 +22,10 @@ inputs:
     description: "Docker image tag (optional)"
     required: false
     default: ""
+  severity:
+    description: "Comma-separated severities: UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL"
+    required: false
+    default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
   soft_fail:
     description: "Do not return an error code if there are failed checks"
     required: false
