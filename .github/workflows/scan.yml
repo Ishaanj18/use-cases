@@ -20,8 +20,8 @@ jobs:
           accuknox_token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcwNzk5MTExLCJqdGkiOiI5ZTc4NTI4MWY2Mjk0NzRiOGRkN2IyZmI3NTIyZGZkMiIsInRlbmFudC1pZCI6MTEsImlzcyI6ImNzcG0uZGV2LmFjY3Vrbm94LmNvbSJ9.V4DfpGjIotN3bQuCWmZXd2sg0Xy8fBnbn5N-iwfFbU8yZMIx3gAnjASIrrXaW3CjQvWYh_INQEtlmgm2LcLEq2p3wMg_wTF1Js8RmbGYQcPGLvyhy6LNGWmPe6gDe9eoC60bUPLg1ZIIIppPi582PPQlAxrnIL49FMqpaoFLnJ1gRw_whVdQhlurxiuXoPF5VCHNVGY5AgElBWhLO9kwPzUBr6wsq_kJa3VOjhSRXYYMZsG18aOL-zLyRgt3yKv2oHxNQWYttDD9QnF-wYbwq2vhFzP4LJVUehJdSuHsRI37_ilqp71DOZC8tUtplWKvE26DX8YEv8eTSp7edqE0CA"
           accuknox_label: "life"
           accuknox_endpoint: "cspm.dev.accuknox.com"
-          image_name: "ishaanj18/wisecow"
-          tag: "latest"
+          image_name: "ishaanj18/library"
+          tag: "v1"
           soft_fail: true
       
           
