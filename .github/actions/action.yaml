@@ -1,0 +1,64 @@
+name: Cloud Compliance Report Export
+description: Generates a CSPM compliance PDF report
+
+inputs:
+  cspm_base_url:
+    required: true
+  cspm_username:
+    required: false
+  cspm_password:
+    required: false
+  cspm_access_token:
+    required: false
+    default: ""
+  account_id:
+    required: true
+  toolkit_base_url:
+    required: false
+    default: "https://toolkit.demo.accuknox.com"
+
+outputs:
+  report_path:
+    description: Path to the generated PDF
+    value: ${{ steps.generate.outputs.report_path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get JWT
+      id: login
+      shell: bash
+      env:
+        CSPM_BASE_URL: ${{ inputs.cspm_base_url }}
+        CSPM_USERNAME: ${{ inputs.cspm_username }}
+        CSPM_PASSWORD: ${{ inputs.cspm_password }}
+        CSPM_ACCESS_TOKEN: ${{ inputs.cspm_access_token }}
+      run: |
+        if [ -n "$CSPM_ACCESS_TOKEN" ]; then
+          echo "token=$CSPM_ACCESS_TOKEN" >> $GITHUB_OUTPUT
+        else
+          TOKEN=$(curl -s -X POST "$CSPM_BASE_URL/api/v1/login/" \
+            -H "Content-Type: application/json" \
+            -d "{\"username\":\"$CSPM_USERNAME\",\"password\":\"$CSPM_PASSWORD\"}" \
+            | jq -r '.token')
+          [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ] && { echo "Login failed"; exit 1; }
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Generate PDF
+      id: generate
+      shell: bash
+      env:
+        JWT: ${{ steps.login.outputs.token }}
+        ACCOUNT_ID: ${{ inputs.account_id }}
+        TOOLKIT_URL: ${{ inputs.toolkit_base_url }}
+      run: |
+        [ -z "$ACCOUNT_ID" ] && { echo "Set input account_id"; exit 1; }
+        curl -sS -X POST "$TOOLKIT_URL/report/cspm/api/v1" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $JWT" \
+          -d "{\"token\":\"$JWT\",\"report_config\":{\"report_name\":\"CSPM Report\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":true,\"asset_summary\":true,\"report_type\":\"cspm\",\"compliance_program\":[\"AWS CIS Benchmark v4.0.1\"]}}" \
+          -o cspm-report.pdf
+        [ -s cspm-report.pdf ] || { echo "PDF empty or missing"; exit 1; }
+        file cspm-report.pdf | grep -q "PDF" || { echo "Response is not a PDF:"; cat cspm-report.pdf; exit 1; }
+        echo "report_path=cspm-report.pdf" >> $GITHUB_OUTPUT
