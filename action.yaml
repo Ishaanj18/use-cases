@@ -22,6 +22,10 @@ inputs:
     description: "Docker image tag (optional)"
     required: false
     default: ""
+  severity:
+    description: "Comma-separated severities: UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL"
+    required: false
+    default: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
   soft_fail:
     description: "Do not return an error code if there are failed checks"
     required: false
@@ -45,6 +49,7 @@ runs:
     - name: Run AccuKnox Container Scan
       shell: bash
       env:
+        DEBUG: "TRUE" 
         ACCUKNOX_TOKEN: ${{ inputs.accuknox_token }}
         ACCUKNOX_LABEL: ${{ inputs.accuknox_label }}
         ACCUKNOX_ENDPOINT: ${{ inputs.accuknox_endpoint }}
@@ -74,6 +79,9 @@ runs:
         echo "Downloading AccuKnox ASPM Scanner..."
         curl -L https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.0/accuknox-aspm-scanner -o accuknox-aspm-scanner
         chmod +x accuknox-aspm-scanner
+
+        touch ./results.json
+        chmod 666 ./results.json
 
         echo "Installing container scan tool..."
         ./accuknox-aspm-scanner tool install --type container
@@ -112,6 +120,7 @@ runs:
         [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
         [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
         [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
+        
 
         echo "Running AccuKnox container scan:"
         echo "./accuknox-aspm-scanner scan $SOFT_FAIL_ARG $KEEP_RESULTS_ARG $PROJECT_NAME_ARG container --command \"$CMD\" --container-mode $GENERATE_SBOM_ARG"
