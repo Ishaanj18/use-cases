@@ -20,7 +20,7 @@ jobs:
           report_name: "CSPM Report"
           ticket_summary: "true"
           asset_summary: "true"
-          report_type: "cspm"
+          report_type: "Compliance"
           compliance_program: "AWS CIS Benchmark v4.0.1"
       - name: Upload artifact
         uses: actions/upload-artifact@v4
