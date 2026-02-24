@@ -27,7 +27,7 @@ inputs:
   report_type:
     description: Type of report
     required: false
-    default: "cspm"
+    default: "Compliance"
   compliance_program:
     description: Compliance program name (single value only)
     required: false
