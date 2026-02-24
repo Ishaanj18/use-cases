@@ -2,6 +2,8 @@ name: Cloud Compliance Report Export
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"   # 6:30 AM IST daily
 
 jobs:
   export:
