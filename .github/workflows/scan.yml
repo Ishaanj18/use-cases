@@ -12,7 +12,7 @@ jobs:
 
       - name: Run CSPM Report
         id: cspm
-        uses: ./.github/actions/cspm-report
+        uses: ./.github/actions
         with:
           cspm_access_token: ${{ secrets.CSPM_ACCESS_TOKEN }}
           account_id: "075565429331"
