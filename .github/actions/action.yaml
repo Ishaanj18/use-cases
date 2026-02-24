@@ -29,9 +29,9 @@ inputs:
     required: false
     default: "cspm"
   compliance_program:
-    description: Compliance program name
+    description: Compliance program name(s) as JSON array (e.g. ["hipaa","pci"])
     required: false
-    default: "AWS CIS Benchmark v4.0.1"
+    default: '["AWS CIS Benchmark v4.0.1"]'
 
 outputs:
   report_path:
@@ -55,11 +55,19 @@ runs:
         COMPLIANCE_PROGRAM: ${{ inputs.compliance_program }}
       run: |
         [ -z "$ACCOUNT_ID" ] && { echo "Set input account_id"; exit 1; }
+
         curl -sS -X POST "$TOOLKIT_URL/report/cspm/api/v1" \
           -H "Content-Type: application/json" \
           -H "Authorization: Bearer $JWT" \
-          -d "{\"report_config\":{\"report_name\":\"$REPORT_NAME\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":$TICKET_SUMMARY,\"asset_summary\":$ASSET_SUMMARY,\"report_type\":\"$REPORT_TYPE\",\"compliance_program\":[\"$COMPLIANCE_PROGRAM\"]}}" \
+          -d "{\"report_config\":{\"report_name\":\"$REPORT_NAME\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":$TICKET_SUMMARY,\"asset_summary\":$ASSET_SUMMARY,\"report_type\":\"$REPORT_TYPE\",\"compliance_program\":$COMPLIANCE_PROGRAM}}" \
           -o cspm-report.pdf
+
         [ -s cspm-report.pdf ] || { echo "PDF empty or missing"; exit 1; }
-        file cspm-report.pdf | grep -q "PDF" || { echo "Response is not a PDF:"; cat cspm-report.pdf; exit 1; }
+
+        file cspm-report.pdf | grep -q "PDF" || { 
+          echo "Response is not a PDF:"
+          cat cspm-report.pdf
+          exit 1
+        }
+
         echo "report_path=cspm-report.pdf" >> $GITHUB_OUTPUT
