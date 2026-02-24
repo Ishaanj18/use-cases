@@ -58,7 +58,7 @@ runs:
         curl -sS -X POST "$TOOLKIT_URL/report/cspm/api/v1" \
           -H "Content-Type: application/json" \
           -H "Authorization: Bearer $JWT" \
-          -d "{\"token\":\"$JWT\",\"report_config\":{\"report_name\":\"$REPORT_NAME\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":$TICKET_SUMMARY,\"asset_summary\":$ASSET_SUMMARY,\"report_type\":\"$REPORT_TYPE\",\"compliance_program\":[\"$COMPLIANCE_PROGRAM\"]}}" \
+          -d "{\"report_config\":{\"report_name\":\"$REPORT_NAME\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":$TICKET_SUMMARY,\"asset_summary\":$ASSET_SUMMARY,\"report_type\":\"$REPORT_TYPE\",\"compliance_program\":[\"$COMPLIANCE_PROGRAM\"]}}" \
           -o cspm-report.pdf
         [ -s cspm-report.pdf ] || { echo "PDF empty or missing"; exit 1; }
         file cspm-report.pdf | grep -q "PDF" || { echo "Response is not a PDF:"; cat cspm-report.pdf; exit 1; }
