@@ -2,20 +2,36 @@ name: Cloud Compliance Report Export
 description: Generates a CSPM compliance PDF report
 
 inputs:
-  cspm_base_url:
-    required: true
-  cspm_username:
-    required: false
-  cspm_password:
-    required: false
   cspm_access_token:
-    required: false
-    default: ""
+    description: JWT access token
+    required: true
   account_id:
+    description: Account ID to generate the report for
     required: true
   toolkit_base_url:
+    description: Toolkit base URL
     required: false
     default: "https://toolkit.demo.accuknox.com"
+  report_name:
+    description: Name of the report
+    required: false
+    default: "CSPM Report"
+  ticket_summary:
+    description: Include ticket summary in report
+    required: false
+    default: "true"
+  asset_summary:
+    description: Include asset summary in report
+    required: false
+    default: "true"
+  report_type:
+    description: Type of report
+    required: false
+    default: "cspm"
+  compliance_program:
+    description: Compliance program name
+    required: false
+    default: "AWS CIS Benchmark v4.0.1"
 
 outputs:
   report_path:
@@ -25,39 +41,24 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Get JWT
-      id: login
-      shell: bash
-      env:
-        CSPM_BASE_URL: ${{ inputs.cspm_base_url }}
-        CSPM_USERNAME: ${{ inputs.cspm_username }}
-        CSPM_PASSWORD: ${{ inputs.cspm_password }}
-        CSPM_ACCESS_TOKEN: ${{ inputs.cspm_access_token }}
-      run: |
-        if [ -n "$CSPM_ACCESS_TOKEN" ]; then
-          echo "token=$CSPM_ACCESS_TOKEN" >> $GITHUB_OUTPUT
-        else
-          TOKEN=$(curl -s -X POST "$CSPM_BASE_URL/api/v1/login/" \
-            -H "Content-Type: application/json" \
-            -d "{\"username\":\"$CSPM_USERNAME\",\"password\":\"$CSPM_PASSWORD\"}" \
-            | jq -r '.token')
-          [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ] && { echo "Login failed"; exit 1; }
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-        fi
-
     - name: Generate PDF
       id: generate
       shell: bash
       env:
-        JWT: ${{ steps.login.outputs.token }}
+        JWT: ${{ inputs.cspm_access_token }}
         ACCOUNT_ID: ${{ inputs.account_id }}
         TOOLKIT_URL: ${{ inputs.toolkit_base_url }}
+        REPORT_NAME: ${{ inputs.report_name }}
+        TICKET_SUMMARY: ${{ inputs.ticket_summary }}
+        ASSET_SUMMARY: ${{ inputs.asset_summary }}
+        REPORT_TYPE: ${{ inputs.report_type }}
+        COMPLIANCE_PROGRAM: ${{ inputs.compliance_program }}
       run: |
         [ -z "$ACCOUNT_ID" ] && { echo "Set input account_id"; exit 1; }
         curl -sS -X POST "$TOOLKIT_URL/report/cspm/api/v1" \
           -H "Content-Type: application/json" \
           -H "Authorization: Bearer $JWT" \
-          -d "{\"token\":\"$JWT\",\"report_config\":{\"report_name\":\"CSPM Report\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":true,\"asset_summary\":true,\"report_type\":\"cspm\",\"compliance_program\":[\"AWS CIS Benchmark v4.0.1\"]}}" \
+          -d "{\"token\":\"$JWT\",\"report_config\":{\"report_name\":\"$REPORT_NAME\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":$TICKET_SUMMARY,\"asset_summary\":$ASSET_SUMMARY,\"report_type\":\"$REPORT_TYPE\",\"compliance_program\":[\"$COMPLIANCE_PROGRAM\"]}}" \
           -o cspm-report.pdf
         [ -s cspm-report.pdf ] || { echo "PDF empty or missing"; exit 1; }
         file cspm-report.pdf | grep -q "PDF" || { echo "Response is not a PDF:"; cat cspm-report.pdf; exit 1; }
