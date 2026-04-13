@@ -1,31 +1,24 @@
-name: Cloud Compliance Report Export
+name: AccuKnox Opengrep SAST
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: "*/5 * * * *"   # 6:30 AM IST daily
+  push:
+    branches:
+      - opengrep
+  pull_request:
+    branches:
+      - opengrep
 
 jobs:
-  export:
+  accuknox-cicd:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run CSPM Report
-        id: cspm
-        uses: ./.github/actions
+      - name: "Run AccuKnox SAST: Opengrep"
+        uses: accuknox/sast-scan-opengrep-action@v1.0.1
         with:
-          cspm_access_token: ${{ secrets.CSPM_ACCESS_TOKEN }}
-          account_id: "075565429331"
-          toolkit_base_url: "https://toolkit.demo.accuknox.com"
-          report_name: "CSPM Report"
-          ticket_summary: "true"
-          asset_summary: "true"
-          report_type: "Compliance"
-          compliance_program: "AWS CIS Benchmark v4.0.1"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cspm-report
-          path: ${{ steps.cspm.outputs.report_path }}
+          accuknox_endpoint: "${{ secrets.ACCUKNOX_ENDPOINT }}"
+          accuknox_token: "${{ secrets.ACCUKNOX_TOKEN }}"
+          accuknox_label: "${{ secrets.ACCUKNOX_LABEL }}"
+          soft_fail: true
