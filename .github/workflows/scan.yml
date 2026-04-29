@@ -20,7 +20,7 @@ jobs:
         uses: accuknox/sast-scan-action@latest
         with:
           skip_sonar_scan: false
-          sonar_project_key: Ishaanj18_use-cases
+          sonar_project_key: "Ishaanj18_use-cases"
           sonar_token: dcdee7a7668feabcf1ad6d74cb707ce1b136d18e
           sonar_host_url: https://sonarcloud.io
           accuknox_endpoint: cspm.dev.accuknox.com 
