@@ -15,6 +15,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        
+      - name: Debug repo metadata
+        run: |
+          echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
+          echo "GITHUB_SERVER_URL=${GITHUB_SERVER_URL}"
+          git rev-parse --is-inside-work-tree || true
+          git remote -v || true
+          echo "origin.url=$(git config --get remote.origin.url || echo '<empty>')"
 
       - name: "Run AccuKnox SAST: Opengrep"
         uses: accuknox/sast-scan-action@latest
