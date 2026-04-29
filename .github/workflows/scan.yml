@@ -25,5 +25,6 @@ jobs:
           sonar_token: "dcdee7a7668feabcf1ad6d74cb707ce1b136d18e"
           sonar_host_url: "https://sonarcloud.io"
           accuknox_endpoint: "cspm.dev.accuknox.com" 
-          accuknox_token: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc4NjU4MzQwLCJqdGkiOiI4Mjc4M2Y0ZTBmY2Q0ZWMzOWJhMTQxYTliY2Q0NWQxNyIsInRlbmFudC1pZCI6MTMsImlzcyI6ImNzcG0uZGV2LmFjY3Vrbm94LmNvbSJ9.dkQourKyuNYuP7f7qJBW0adPHzFISHmWiD__L38oeyAU5UTRXA1ppMWcP7dmLzainnTpd9Mayhf5veMcS44ehRfLn7LP_U7pTxabqqlB1QtlYDTAIBweAVDjnJQ14zRX0QFZZw5VaUyfBzmRCaL-9qTqusIge-BA8ezygKxcFvXNos_ZDlO7MFw1qjnIFEY6BmKTzyhbGOa6X1m3FfFCCwjY99DcrjzeBhAu84YGAHelHYOZJgg_LzD2IGom0Z_vdoqE29iINRhZnlRuOqORSrImU5qlaccp3xHimhaenOmQOrDv4oQj6scYHSQTBbct-52VPfCEUbuWB6neOFbNZQ          accuknox_label: "sonar"
+          accuknox_token: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc4NjU4MzQwLCJqdGkiOiI4Mjc4M2Y0ZTBmY2Q0ZWMzOWJhMTQxYTliY2Q0NWQxNyIsInRlbmFudC1pZCI6MTMsImlzcyI6ImNzcG0uZGV2LmFjY3Vrbm94LmNvbSJ9.dkQourKyuNYuP7f7qJBW0adPHzFISHmWiD__L38oeyAU5UTRXA1ppMWcP7dmLzainnTpd9Mayhf5veMcS44ehRfLn7LP_U7pTxabqqlB1QtlYDTAIBweAVDjnJQ14zRX0QFZZw5VaUyfBzmRCaL-9qTqusIge-BA8ezygKxcFvXNos_ZDlO7MFw1qjnIFEY6BmKTzyhbGOa6X1m3FfFCCwjY99DcrjzeBhAu84YGAHelHYOZJgg_LzD2IGom0Z_vdoqE29iINRhZnlRuOqORSrImU5qlaccp3xHimhaenOmQOrDv4oQj6scYHSQTBbct-52VPfCEUbuWB6neOFbNZQ 
+          accuknox_label: "sonar"
           soft_fail: false
