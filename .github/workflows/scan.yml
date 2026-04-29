@@ -24,7 +24,7 @@ jobs:
           sonar_org_id: "ishaanj18"
           sonar_token: "dcdee7a7668feabcf1ad6d74cb707ce1b136d18e"
           sonar_host_url: "https://sonarcloud.io"
-          accuknox_endpoint: "cspm.dev.accuknox.com" 
+          accuknox_endpoint: "cspm.demo.accuknox.com" 
           accuknox_label: "sonar"
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
           soft_fail: false
