@@ -23,7 +23,6 @@ jobs:
           sonar_project_key: Ishaanj18_use-cases
           sonar_token: dcdee7a7668feabcf1ad6d74cb707ce1b136d18e
           sonar_host_url: https://sonarcloud.io
-          sonar_organization: Ishaanj18
           accuknox_endpoint: cspm.dev.accuknox.com 
           accuknox_token: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc3OTYzNzk0LCJqdGkiOiIzOTE2NjI5NDJhZjg0ZjFkOTIyZDYwZTFjMmJhMWFiNyIsInRlbmFudC1pZCI6MTMsImlzcyI6ImNzcG0uZGV2LmFjY3Vrbm94LmNvbSJ9.e_A5wUx2o1lSfGZOpm-AR5CwKp7Prc-1jT9-rFV7GalBwsGBxvx87Wl1t1NfMeRD5S3GIc4ZEmI-tY_THiLa52ryEsIl_zjQ8iy-BsXPtA4yEWHWTyAKMS1489cQNwk4jnnYvkTw8ovLNtyuUYo8DoPZL5MvYgEHODS-Sa-0biVjjNeEKSKDVLH7RbE1AcM_f80alvolXcKPi-G6LjDL-84FtceLoQtj2wQtt_5wkfI-NWM5HMZr17SiRCqBRoPBoezE1H2JbUXSd7btPjViHMNuVUvxvBiFAXV-SzogXaQLpLqX4236oHJdcRX6OhJKfRboDdGvuMzHVVuCBelEoA
           accuknox_label: sonar
