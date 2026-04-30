@@ -1,73 +1,97 @@
-name: Cloud Compliance Report Export
-description: Generates a CSPM compliance PDF report
+name: "AccuKnox SAST"
+description: "Run SonarQube-based SAST scan and upload results to AccuKnox Panel."
+
+branding:
+  icon: "shield"
+  color: "purple"
 
 inputs:
-  cspm_access_token:
-    description: JWT access token
+  skip_sonar_scan:
+    description: "Whether to skip the SonarQube scan."
+    required: false
+    default: "false"
+  sonar_project_key:
+    description: "SonarQube project key"
     required: true
-  account_id:
-    description: Account ID to generate the report for
+  sonar_org_id:
+    description: "SonarQube organisation ID (cloud only)"
+    required: false
+  sonar_token:
+    description: "SonarQube authentication token"
     required: true
-  toolkit_base_url:
-    description: Toolkit base URL
+  sonar_host_url:
+    description: "SonarQube host URL"
+    required: true
+  soft_fail:
+    description: "Do not fail the pipeline if scan finds issues"
     required: false
-    default: "https://toolkit.demo.accuknox.com"
-  report_name:
-    description: Name of the report
-    required: false
-    default: "CSPM Report"
-  ticket_summary:
-    description: Include ticket summary in report
-    required: false
-    default: "true"
-  asset_summary:
-    description: Include asset summary in report
-    required: false
-    default: "true"
-  report_type:
-    description: Type of report
-    required: false
-    default: "Compliance"
-  compliance_program:
-    description: Compliance program name (single value only)
-    required: false
-    default: "AWS CIS Benchmark v4.0.1"
-
-outputs:
-  report_path:
-    description: Path to the generated PDF
-    value: ${{ steps.generate.outputs.report_path }}
+    default: "false"
+  accuknox_endpoint:
+    description: "AccuKnox CSPM panel endpoint URL"
+    required: true
+  accuknox_token:
+    description: "AccuKnox authentication token"
+    required: true
+  accuknox_label:
+    description: "Label for associating scan results in AccuKnox"
+    required: true
 
 runs:
-  using: composite
+  using: "composite"
   steps:
-    - name: Generate PDF
-      id: generate
+    - name: Run AccuKnox SQ-SAST Scan
       shell: bash
       env:
-        JWT: ${{ inputs.cspm_access_token }}
-        ACCOUNT_ID: ${{ inputs.account_id }}
-        TOOLKIT_URL: ${{ inputs.toolkit_base_url }}
-        REPORT_NAME: ${{ inputs.report_name }}
-        TICKET_SUMMARY: ${{ inputs.ticket_summary }}
-        ASSET_SUMMARY: ${{ inputs.asset_summary }}
-        REPORT_TYPE: ${{ inputs.report_type }}
-        COMPLIANCE_PROGRAM: ${{ inputs.compliance_program }}
+        SKIP_SONAR_SCAN: ${{ inputs.skip_sonar_scan }}
+        SONAR_PROJECT_KEY: ${{ inputs.sonar_project_key }}
+        SONAR_ORG_ID: ${{ inputs.sonar_org_id }}
+        SONAR_TOKEN: ${{ inputs.sonar_token }}
+        SONAR_HOST_URL: ${{ inputs.sonar_host_url }}
+        SOFT_FAIL: ${{ inputs.soft_fail }}
+        ACCUKNOX_ENDPOINT: ${{ inputs.accuknox_endpoint }}
+        ACCUKNOX_TOKEN: ${{ inputs.accuknox_token }}
+        ACCUKNOX_LABEL: ${{ inputs.accuknox_label }}
+
       run: |
-        [ -z "$ACCOUNT_ID" ] && { echo "Set input account_id"; exit 1; }
+        echo " Starting AccuKnox SQ-SAST Scan..."
 
-        curl -sS -X POST "$TOOLKIT_URL/report/cspm/api/v1" \
-          -H "Content-Type: application/json" \
-          -H "Authorization: Bearer $JWT" \
-          -d "{\"report_config\":{\"report_name\":\"$REPORT_NAME\",\"account\":[\"$ACCOUNT_ID\"],\"ticket_summary\":$TICKET_SUMMARY,\"asset_summary\":$ASSET_SUMMARY,\"report_type\":\"$REPORT_TYPE\",\"compliance_program\":[\"$COMPLIANCE_PROGRAM\"]}}" \
-          -o cspm-report.pdf
+        # Normalise soft fail flag
+        SOFT_FAIL="${SOFT_FAIL//[$'\t\r\n ']}"
+        SOFT_FAIL_ARG=""
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
 
-        [ -s cspm-report.pdf ] || { echo "PDF empty or missing"; exit 1; }
+        echo "Downloading AccuKnox ASPM Scanner..."
+        curl -L https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox-aspm-scanner -o accuknox-aspm-scanner
+        chmod +x accuknox-aspm-scanner
 
-        file cspm-report.pdf | grep -q "PDF" || {
-          echo "Response is not a PDF:"
-          cat cspm-report.pdf
-          exit 1
-        }
+        # Build SonarQube properties (no skip flag here)
+        CMD_ARGS="-Dsonar.projectKey=$SONAR_PROJECT_KEY \
+        -Dsonar.token=$SONAR_TOKEN \
+        -Dsonar.host.url=$SONAR_HOST_URL \
+        -Dsonar.qualitygate.wait=true"
 
-        echo "report_path=cspm-report.pdf" >> $GITHUB_OUTPUT
+        # Add optional org id
+        [ -n "$SONAR_ORG_ID" ] && CMD_ARGS="$CMD_ARGS -Dsonar.organization=$SONAR_ORG_ID"
+
+        # Add optional --skip-sonar-scan flag OUTSIDE the command string
+        SKIP_FLAG=""
+        if [ "$SKIP_SONAR_SCAN" = "true" ]; then
+          SKIP_FLAG="--skip-sonar-scan"
+        fi
+
+        echo "./accuknox-aspm-scanner scan $SOFT_FAIL_ARG sq-sast $SKIP_FLAG \
+                --command \"$CMD_ARGS\" \
+                --repo-url \"$GITHUB_REPOSITORY\" \
+                --branch \"${GITHUB_REF#refs/heads/}\" \
+                --commit-sha \"$GITHUB_SHA\" \
+                --pipeline-url \"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\" \
+                --container-mode"
+        
+        ./accuknox-aspm-scanner scan $SOFT_FAIL_ARG sq-sast $SKIP_FLAG \
+          --command "$CMD_ARGS" \
+          --branch "${GITHUB_REF#refs/heads/}" \
+          --commit-sha "$GITHUB_SHA" \
+          --pipeline-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+          --container-mode
