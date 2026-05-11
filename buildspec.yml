@@ -2,10 +2,9 @@ version: 0.2
 
 env:
   variables:
-    SOFT_FAIL: "true"
-    DIRECTORY: "."
-    COMPACT: "true"
-    QUIET: "true"
+    RESULTS: ""
+    BRANCH: "all"
+    EXCLUDE_PATHS: ""
 
 phases:
   install:
@@ -18,18 +17,19 @@ phases:
       - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.14.2-py3-none-any.whl --break-system-packages
 
   build:
-    commands: |
-      echo "Running AccuKnox IaC scan"
-      if [ "$SOFT_FAIL" = "true" ]; then
-        SOFT_FAIL_ARG="--softfail"
-      fi
+    commands:
+      - |
+        echo "Running AccuKnox secret scan"
 
-      CMD_ARGS=""
-      [ -n "$FILE" ] && CMD_ARGS="$CMD_ARGS --file $FILE"
-      [ -n "$DIRECTORY" ] && CMD_ARGS="$CMD_ARGS --directory $DIRECTORY"
-      [ "$COMPACT" = "true" ] && CMD_ARGS="$CMD_ARGS --compact"
-      [ "$QUIET" = "true" ] && CMD_ARGS="$CMD_ARGS --quiet"
-      [ -n "$FRAMEWORK" ] && CMD_ARGS="$CMD_ARGS --framework $FRAMEWORK"
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
 
-      echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
-      accuknox-aspm-scanner scan $SOFT_FAIL_ARG iac --command "$CMD_ARGS" --container-mode
+        COMMAND="git file://."
+        ARGS=""
+        [ -n "$RESULTS" ] && ARGS="$ARGS --results $RESULTS"
+        [ -n "$BRANCH" ] && ARGS="$ARGS --branch $BRANCH"
+        [ -n "$EXCLUDE_PATHS" ] && ARGS="$ARGS --exclude-paths $EXCLUDE_PATHS"
+
+        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
+        accuknox-aspm-scanner scan $SOFT_FAIL_ARG secret --command "$COMMAND $ARGS" --container-mode
