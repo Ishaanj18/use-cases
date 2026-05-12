@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     SOFT_FAIL: "true"
-    TARGET_URL: "[https://juice-shop.herokuapp.com/](https://juice-shop.herokuapp.com/)"
+    TARGET_URL: "https://juice-shop.herokuapp.com/"
     DAST_SCAN_SCRIPT: "zap-baseline.py"
 
 phases:
