@@ -3,33 +3,111 @@ version: 0.2
 env:
   variables:
     SOFT_FAIL: "true"
-    TARGET_URL: "https://juice-shop.herokuapp.com/"
-    DAST_SCAN_SCRIPT: "zap-baseline.py"
+    IMAGE_NAME: "gitlab"
+    IMAGE_TAG: "test"
+    IMAGE_TAR: "image.tar"
+    SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+    GENERATE_SBOM: "false"
+    ACCUKNOX_PROJECT_NAME: ""
+    UPLOAD_RESULTS: "true"
 
 phases:
   install:
     runtime-versions:
       python: 3.11
-
+      
   pre_build:
     commands:
       - echo "Installing AccuKnox ASPM scanner..."
-      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.2/accuknox_aspm_scanner-0.14.2-py3-none-any.whl --break-system-packages
+      - pip install https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.0/accuknox_aspm_scanner-0.14.0-py3-none-any.whl --break-system-packages
 
   build:
     commands:
       - |
-        echo "Running AccuKnox DAST scan"
-        mkdir /tmp/scan-dir
-        chmod 777 /tmp/scan-dir
-        cd /tmp/scan-dir
+        set -e
 
+        if [ -z "$ACCUKNOX_TOKEN" ] || [ -z "$ACCUKNOX_LABEL" ] || [ -z "$ACCUKNOX_ENDPOINT" ] || [ -z "$IMAGE_NAME" ]; then
+          echo "ERROR: ACCUKNOX_TOKEN, ACCUKNOX_LABEL, ACCUKNOX_ENDPOINT and IMAGE_NAME must be provided!"
+          exit 1
+        fi
+
+        # Validate project name when SBOM is enabled
+        GENERATE_SBOM="${GENERATE_SBOM,,}"
+        GENERATE_SBOM="${GENERATE_SBOM//[$'\t\r\n ']}"
+
+        if [ "$GENERATE_SBOM" = "true" ] && [ -z "$ACCUKNOX_PROJECT_NAME" ]; then
+          echo "ERROR: ACCUKNOX_PROJECT_NAME is required when GENERATE_SBOM=true"
+          exit 1
+        fi
+
+        echo "Building Docker image..."
+        docker build -t $IMAGE_NAME:$IMAGE_TAG -f Dockerfile .
+
+        echo "Saving Docker image..."
+        docker save -o $IMAGE_TAR $IMAGE_NAME:$IMAGE_TAG
+
+        echo "Loading Docker image..."
+        docker load -i $IMAGE_TAR
+
+        echo "Installing container scan tool..."
+        accuknox-aspm-scanner tool install --type container
+
+        # Normalize SOFT_FAIL
+        SOFT_FAIL="${SOFT_FAIL,,}"
+        SOFT_FAIL="${SOFT_FAIL//[$'\t\r\n ']}"
+
+        SOFT_FAIL_ARG=""
         if [ "$SOFT_FAIL" = "true" ]; then
           SOFT_FAIL_ARG="--softfail"
         fi
 
-        ARGS="$DAST_SCAN_SCRIPT -t $TARGET_URL -I "
+        # Build project name argument
+        PROJECT_NAME_ARGS=""
+        if [ -n "$ACCUKNOX_PROJECT_NAME" ]; then
+          PROJECT_NAME_ARGS="--project-name $ACCUKNOX_PROJECT_NAME"
+        fi
 
-        echo accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        accuknox-aspm-scanner scan $SOFT_FAIL_ARG dast --command "$ARGS" --container-mode
-        cd -
+        # Build scan command dynamically
+        CMD="image $IMAGE_NAME"
+
+        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE_NAME:$IMAGE_TAG"
+        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+
+        echo "Running AccuKnox vulnerability scan..."
+        echo accuknox-aspm-scanner scan \
+          $SOFT_FAIL_ARG \
+          --keep-results \
+          container \
+          --command "$CMD" \
+          --container-mode
+
+        accuknox-aspm-scanner scan \
+          $SOFT_FAIL_ARG \
+          --keep-results \
+          container \
+          --command "$CMD" \
+          --container-mode
+
+        cp results.json results-vuln.json
+
+        # Generate SBOM if enabled
+        if [ "$GENERATE_SBOM" = "true" ]; then
+          echo "Running AccuKnox SBOM scan..."
+
+          accuknox-aspm-scanner scan \
+            $SOFT_FAIL_ARG \
+            --keep-results \
+            $PROJECT_NAME_ARGS \
+            container \
+            --command "$CMD" \
+            --container-mode \
+            --generate-sbom
+
+          cp results.json results-sbom.json
+        fi
+
+artifacts:
+  files:
+    - '**/*'
+    - 'results-*.json'
+    - $IMAGE_TAR
