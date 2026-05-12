@@ -9,13 +9,8 @@ env:
     SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
     GENERATE_SBOM: "false"
     ACCUKNOX_PROJECT_NAME: ""
-    UPLOAD_RESULTS: "true"
 
 phases:
-  install:
-    runtime-versions:
-      python: 3.11
-      
   pre_build:
     commands:
       - echo "Installing AccuKnox ASPM scanner..."
@@ -31,9 +26,8 @@ phases:
           exit 1
         fi
 
-        # Validate project name when SBOM is enabled
-        GENERATE_SBOM="${GENERATE_SBOM,,}"
-        GENERATE_SBOM="${GENERATE_SBOM//[$'\t\r\n ']}"
+        # Normalize GENERATE_SBOM
+        GENERATE_SBOM=$(echo "$GENERATE_SBOM" | tr '[:upper:]' '[:lower:]' | xargs)
 
         if [ "$GENERATE_SBOM" = "true" ] && [ -z "$ACCUKNOX_PROJECT_NAME" ]; then
           echo "ERROR: ACCUKNOX_PROJECT_NAME is required when GENERATE_SBOM=true"
@@ -53,8 +47,7 @@ phases:
         accuknox-aspm-scanner tool install --type container
 
         # Normalize SOFT_FAIL
-        SOFT_FAIL="${SOFT_FAIL,,}"
-        SOFT_FAIL="${SOFT_FAIL//[$'\t\r\n ']}"
+        SOFT_FAIL=$(echo "$SOFT_FAIL" | tr '[:upper:]' '[:lower:]' | xargs)
 
         SOFT_FAIL_ARG=""
         if [ "$SOFT_FAIL" = "true" ]; then
@@ -67,19 +60,18 @@ phases:
           PROJECT_NAME_ARGS="--project-name $ACCUKNOX_PROJECT_NAME"
         fi
 
-        # Build scan command dynamically
+        # Build scan command
         CMD="image $IMAGE_NAME"
 
-        [ -n "$IMAGE_TAG" ] && CMD="image $IMAGE_NAME:$IMAGE_TAG"
-        [ -n "$SEVERITY" ] && CMD="$CMD --severity $SEVERITY"
+        if [ -n "$IMAGE_TAG" ]; then
+          CMD="image $IMAGE_NAME:$IMAGE_TAG"
+        fi
+
+        if [ -n "$SEVERITY" ]; then
+          CMD="$CMD --severity $SEVERITY"
+        fi
 
         echo "Running AccuKnox vulnerability scan..."
-        echo accuknox-aspm-scanner scan \
-          $SOFT_FAIL_ARG \
-          --keep-results \
-          container \
-          --command "$CMD" \
-          --container-mode
 
         accuknox-aspm-scanner scan \
           $SOFT_FAIL_ARG \
