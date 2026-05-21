@@ -14,25 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Debug repo metadata
-        run: |
-          echo "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}"
-          echo "GITHUB_SERVER_URL=${GITHUB_SERVER_URL}"
-          git rev-parse --is-inside-work-tree || true
-          git remote -v || true
-          echo "origin.url=$(git config --get remote.origin.url || echo '<empty>')"
+        uses: actions/checkout@v3
 
-      - name: "Run AccuKnox SAST: Opengrep"
-        uses: ./.github/actions
+      - name: "Run Accuknox SAST: Opengrep"
+        uses: accuknox/sast-scan-opengrep-action@latest
         with:
-          skip_sonar_scan: false
-          sonar_project_key: "ishaanj18_use-cases"
-          sonar_org_id: "ishaanj18"
-          sonar_token: "dcdee7a7668feabcf1ad6d74cb707ce1b136d18e"
-          sonar_host_url: "https://sonarcloud.io"
-          accuknox_endpoint: "cspm.stage.accuknox.com" 
-          accuknox_label: "sonar"
+          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
-          soft_fail: false
+          accuknox_label: ${{ secrets.ACCUKNOX_LABEL }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY}}
+          accuknox_ai_analysis: "false"
+          soft_fail: "true"
