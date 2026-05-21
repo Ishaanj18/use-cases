@@ -3,10 +3,10 @@ name: AccuKnox Opengrep SAST
 on:
   push:
     branches:
-      - opengrep
+      - all
   pull_request:
     branches:
-      - opengrep
+      - all
   workflow_dispatch:
 
 jobs:
