@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   scan:
-    runs-on: accuknox-runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
