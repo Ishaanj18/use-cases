@@ -1,0 +1,30 @@
+name: Run AccuKnox Scan
+
+on:
+  push:
+    branches:
+      - '**'
+
+  pull_request:
+    branches:
+      - '**'
+
+  workflow_dispatch:
+    inputs:
+      accuknox_label:
+        description: "Label for AccuKnox scans"
+        required: true
+        default: "alicetest"
+
+jobs:
+  security-scan:
+    uses: ./.github/workflows/scan.yml
+
+    with:
+      target_branch: ${{ github.ref_name }}
+
+      # For manual trigger use provided input
+      # otherwise use branch name automatically
+      accuknox_label: ${{ github.event.inputs.accuknox_label || github.ref_name }}
+
+    secrets: inherit
