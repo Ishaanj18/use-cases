@@ -1,27 +1,90 @@
-name: AccuKnox Opengrep SAST
+name: AccuKnox Security Workflow
 
 on:
-  push:
-    branches:
-      - all
-  pull_request:
-    branches:
-      - all
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      target_branch:
+        required: true
+        type: string
+      accuknox_label:
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
-  accuknox-cicd:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  scan:
+    runs-on: accuknox-runner
 
-      - name: "Run Accuknox SAST: Opengrep"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.target_branch }}
+          fetch-depth: 0 # Required to get the full commit history.
+
+      #########################################################
+      # SAST
+      #########################################################
+
+      - name: Run SAST Scan
         uses: accuknox/sast-scan-opengrep-action@latest
         with:
           accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
-          accuknox_label: ${{ secrets.ACCUKNOX_LABEL }}
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY}}
-          accuknox_ai_analysis: "false"
-          soft_fail: "true"
+          accuknox_label: ${{ inputs.accuknox_label }}
+          # accuknox_tenant: ${{ secrets.ACCUKNOX_TENANT_ID }}
+          # input_soft_fail: "true"
+          soft_fail: true
+
+      #########################################################
+      # Secret Scan
+      #########################################################
+
+      - name: Run Secret Scan
+        uses: accuknox/secret-scan-action@latest
+        with:
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          # tenant_id: ${{ secrets.ACCUKNOX_TENANT_ID }}
+          accuknox_label: ${{ inputs.accuknox_label }}
+          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
+          soft_fail: true
+          # fail: false
+
+
+
+      #########################################################
+      # Cleanup
+      #########################################################
+
+      - name: Cleanup Results
+        run: |
+          rm -f results.json
+          rm -f trufflehog-results.json
+
+      #########################################################
+      # IaC Scan
+      #########################################################
+
+      - name: Run IaC Scan
+        uses: accuknox/iac-scan-action@latest
+        with:
+          directory: "."
+          compact: true
+          quiet: true
+          output_format: json
+          output_file_path: "/tmp/results.json"
+          soft_fail: true
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
+          accuknox_label: ${{ inputs.accuknox_label }}
+
+      #########################################################
+      # Post-Run Cleanup (Safely done at the absolute end)
+      #########################################################
+
+      - name: Safe Workspace Cleanup
+        if: always()
+        run: |
+          rm -f results.json trufflehog-results.json iac-results.json || true
