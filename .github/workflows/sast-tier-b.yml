@@ -8,27 +8,58 @@ jobs:
     runs-on: [self-hosted, linux, accuknox-runner, local-repro]
     steps:
       - uses: actions/checkout@v4
-      - run: |
+
+      - name: Download AccuKnox CLI
+        run: |
           curl -fsSL -o accuknox-aspm-scanner \
             https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.6/accuknox-aspm-scanner
           chmod +x accuknox-aspm-scanner
-      - name: Container mode (expect fail)
+
+      - name: Container mode (expect fail / expect results.json missing)
         continue-on-error: true
         run: |
+          set +e
           ./accuknox-aspm-scanner scan --skip-upload --keep-results \
-            sast --command "." --container-mode --severity HIGH || true
+            sast --command "." --container-mode --severity HIGH
+          scan_rc=$?
+          set -e
+
+          echo "container-mode scan_exit_code=$scan_rc"
+
+          echo "Checking results.json..."
           ls -la results.json || echo "MISSING (expected)"
+          if [ -f results.json ]; then
+            echo "UNEXPECTED: results.json exists"
+            exit 1
+          fi
 
   sast-fix:
     needs: sast-broken
     runs-on: [self-hosted, linux, accuknox-runner, local-repro]
     steps:
       - uses: actions/checkout@v4
-      - run: |
+
+      - name: Download AccuKnox CLI
+        run: |
           curl -fsSL -o accuknox-aspm-scanner \
             https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.6/accuknox-aspm-scanner
           chmod +x accuknox-aspm-scanner
+
+      - name: Native mode fix (expect results.json exists)
+        run: |
+          # Scan may fail due to HIGH findings, but we still want to verify results.json is produced.
+          set +e
           ./accuknox-aspm-scanner tool install --type sast
+          install_rc=$?
+
           ./accuknox-aspm-scanner scan --skip-upload --keep-results \
             sast --command "." --severity HIGH
-          test -f results.json
+          scan_rc=$?
+
+          set -e
+          echo "install_exit_code=$install_rc"
+          echo "native scan_exit_code=$scan_rc"
+
+          echo "Checking results.json..."
+          ls -la results.json
+          test -s results.json
