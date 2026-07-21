@@ -1,0 +1,73 @@
+name: "Local SAST Opengrep Test"
+description: "Test container-runner detection and native fallback without AccuKnox upload"
+
+inputs:
+  soft_fail:
+    description: "Soft fail toggle"
+    required: false
+    default: "true"
+  severity:
+    description: "Comma-separated severities"
+    required: false
+    default: "HIGH"
+  scanner_version:
+    description: "accuknox-aspm-scanner release version"
+    required: false
+    default: "v0.14.6"
+
+outputs:
+  execution_mode:
+    description: "container or native"
+    value: ${{ steps.run_sast.outputs.execution_mode }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: run_sast
+      shell: bash
+      env:
+        SOFT_FAIL: ${{ inputs.soft_fail }}
+        SEVERITY: ${{ inputs.severity }}
+        SCANNER_VERSION: ${{ inputs.scanner_version }}
+      run: |
+        set -euo pipefail
+
+        echo "Downloading scanner ${SCANNER_VERSION}..."
+        curl -fsSL -o accuknox-aspm-scanner \
+          "https://github.com/accuknox/aspm-scanner-cli/releases/download/${SCANNER_VERSION}/accuknox-aspm-scanner"
+        chmod +x accuknox-aspm-scanner
+
+        SOFT_FAIL_ARG=""
+        SOFT_FAIL="${SOFT_FAIL//[$'\t\r\n ']}"
+        if [ "$SOFT_FAIL" = "true" ]; then
+          SOFT_FAIL_ARG="--softfail"
+        fi
+
+        SEVERITY_ARG=""
+        SEVERITY="${SEVERITY//[$'\t\r\n ']}"
+        if [ -n "$SEVERITY" ]; then
+          SEVERITY_ARG="--severity $SEVERITY"
+        fi
+
+        SAST_MODE_ARG="--container-mode"
+        EXECUTION_MODE="container"
+
+        # Logic under test
+        if [ -f "/.dockerenv" ] || grep -qaE '(docker|containerd)' /proc/1/cgroup 2>/dev/null; then
+          echo "Container runner detected; switching to native mode."
+          ./accuknox-aspm-scanner tool install --type sast
+          SAST_MODE_ARG=""
+          EXECUTION_MODE="native"
+        else
+          echo "Non-container runner detected; keeping container-mode."
+        fi
+
+        echo "execution_mode=${EXECUTION_MODE}" >> "$GITHUB_OUTPUT"
+
+        # Important: skip upload so no AccuKnox env vars are needed
+        ./accuknox-aspm-scanner scan --skip-upload --keep-results $SOFT_FAIL_ARG sast \
+          --command "." \
+          $SAST_MODE_ARG \
+          $SEVERITY_ARG
+
+        ls -la results.json
