@@ -1,0 +1,30 @@
+name: SAST Local Action Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-local-action:
+    runs-on: [self-hosted, linux, accuknox-runner, local-repro]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show runner context
+        run: |
+          uname -m
+          id
+          if [ -f /.dockerenv ]; then echo "dockerenv=true"; else echo "dockerenv=false"; fi
+          cat /proc/1/cgroup || true
+
+      - name: Run local SAST action
+        id: local_sast
+        uses: ./.github/actions/sast-action.yml
+        with:
+          soft_fail: "true"   # keep job green even if HIGH findings exist
+          severity: "HIGH"
+
+      - name: Assert mode + results
+        run: |
+          echo "Execution mode: ${{ steps.local_sast.outputs.execution_mode }}"
+          test -f results.json
+          ls -la results.json
