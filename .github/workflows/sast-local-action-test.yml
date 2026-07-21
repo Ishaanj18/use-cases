@@ -18,7 +18,7 @@ jobs:
 
       - name: Run local SAST action
         id: local_sast
-        uses: ./.github/actions/sast-action.yml
+        uses: ./.github/actions/sast-action
         with:
           soft_fail: "true"   # keep job green even if HIGH findings exist
           severity: "HIGH"
