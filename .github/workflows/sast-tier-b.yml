@@ -1,65 +1,66 @@
-name: SAST Tier B
+name: SAST Tier B (Updated Action)
 
 on:
   workflow_dispatch:
 
 jobs:
-  sast-broken:
+  # 1) Sanity: runner info
+  runner-preflight:
     runs-on: [self-hosted, linux, accuknox-runner, local-repro]
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Download AccuKnox CLI
+      - name: Runner diagnostics
         run: |
-          curl -fsSL -o accuknox-aspm-scanner \
-            https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.6/accuknox-aspm-scanner
-          chmod +x accuknox-aspm-scanner
-
-      - name: Container mode (expect fail / expect results.json missing)
-        continue-on-error: true
-        run: |
-          set +e
-          ./accuknox-aspm-scanner scan --skip-upload --keep-results \
-            sast --command "." --container-mode --severity HIGH
-          scan_rc=$?
-          set -e
-
-          echo "container-mode scan_exit_code=$scan_rc"
-
-          echo "Checking results.json..."
-          ls -la results.json || echo "MISSING (expected)"
-          if [ -f results.json ]; then
-            echo "UNEXPECTED: results.json exists"
-            exit 1
+          echo "pwd=$(pwd)"
+          uname -a
+          uname -m
+          id
+          if [ -f /.dockerenv ]; then
+            echo "container_runner=true"
+          else
+            echo "container_runner=false"
           fi
+          docker version || true
 
-  sast-fix:
-    needs: sast-broken
+  # 2) Test updated action in normal mode (soft_fail=false)
+  sast-updated-action-hardfail:
+    needs: runner-preflight
     runs-on: [self-hosted, linux, accuknox-runner, local-repro]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download AccuKnox CLI
+      - name: Run updated SAST action (hard fail policy)
+        uses: accuknox/sast-scan-opengrep-action@YOUR_BRANCH_OR_SHA
+        with:
+          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_label: pipeline
+          severity: HIGH
+          soft_fail: false
+          accuknox_ai_analysis: false
+
+      - name: Assert results file exists
+        if: always()
         run: |
-          curl -fsSL -o accuknox-aspm-scanner \
-            https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.6/accuknox-aspm-scanner
-          chmod +x accuknox-aspm-scanner
+          ls -la results.json || (echo "results.json missing" && exit 1)
 
-      - name: Native mode fix (expect results.json exists)
+  # 3) Optional: prove workflow continuation behavior (soft_fail=true)
+  sast-updated-action-softfail:
+    needs: runner-preflight
+    runs-on: [self-hosted, linux, accuknox-runner, local-repro]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run updated SAST action (soft fail policy)
+        uses: accuknox/sast-scan-opengrep-action@YOUR_BRANCH_OR_SHA
+        with:
+          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_label: pipeline
+          severity: HIGH
+          soft_fail: true
+          accuknox_ai_analysis: false
+
+      - name: Assert results file exists even with findings
+        if: always()
         run: |
-          # Scan may fail due to HIGH findings, but we still want to verify results.json is produced.
-          set +e
-          ./accuknox-aspm-scanner tool install --type sast
-          install_rc=$?
-
-          ./accuknox-aspm-scanner scan --skip-upload --keep-results \
-            sast --command "." --severity HIGH
-          scan_rc=$?
-
-          set -e
-          echo "install_exit_code=$install_rc"
-          echo "native scan_exit_code=$scan_rc"
-
-          echo "Checking results.json..."
-          ls -la results.json
-          test -s results.json
+          ls -la results.json || (echo "results.json missing" && exit 1)
