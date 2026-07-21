@@ -1,0 +1,34 @@
+name: SAST Tier B
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sast-broken:
+    runs-on: [self-hosted, linux, accuknox-runner, local-repro]
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl -fsSL -o accuknox-aspm-scanner \
+            https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.6/accuknox-aspm-scanner
+          chmod +x accuknox-aspm-scanner
+      - name: Container mode (expect fail)
+        continue-on-error: true
+        run: |
+          ./accuknox-aspm-scanner scan --skip-upload --keep-results \
+            sast --command "." --container-mode --severity HIGH || true
+          ls -la results.json || echo "MISSING (expected)"
+
+  sast-fix:
+    needs: sast-broken
+    runs-on: [self-hosted, linux, accuknox-runner, local-repro]
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl -fsSL -o accuknox-aspm-scanner \
+            https://github.com/accuknox/aspm-scanner-cli/releases/download/v0.14.6/accuknox-aspm-scanner
+          chmod +x accuknox-aspm-scanner
+          ./accuknox-aspm-scanner tool install --type sast
+          ./accuknox-aspm-scanner scan --skip-upload --keep-results \
+            sast --command "." --severity HIGH
+          test -f results.json
