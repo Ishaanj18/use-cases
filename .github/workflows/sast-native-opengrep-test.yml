@@ -1,0 +1,36 @@
+name: Test native OpenGrep SAST action
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sast-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Runner diagnostics
+        run: |
+          echo "os=$(uname -s) arch=$(uname -m)"
+          if [ -f /.dockerenv ]; then echo "dockerenv=true"; else echo "dockerenv=false"; fi
+
+      - name: "Run Accuknox SAST: Opengrep"
+        uses: accuknox/sast-scan-opengrep-action@feat/native-opengrep-binary
+        with:
+          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_label: native-opengrep-test
+          soft_fail: "true"
+          severity: "HIGH"
+          scanner_version: v0.15.1
+          accuknox_ai_analysis: "false"
+
+      - name: Upload scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-results
+          path: results.json
+          if-no-files-found: warn
