@@ -19,9 +19,9 @@ jobs:
       - name: "Run Accuknox SAST: Opengrep"
         uses: accuknox/sast-scan-opengrep-action@feat/native-opengrep-binary
         with:
-          accuknox_endpoint: ${{ secrets.ACCUKNOX_ENDPOINT }}
+          accuknox_endpoint: cspm.demo.accuknox.com
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
-          accuknox_label: native-opengrep-test
+          accuknox_label: newLabel
           soft_fail: "true"
           severity: "HIGH"
           scanner_version: v0.15.1
