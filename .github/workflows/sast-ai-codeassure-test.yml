@@ -1,27 +1,10 @@
 name: Test AI SAST (CodeAssure)
 
+# Model settings come from repo Variables; the key comes from repo Secrets.
+#   Variables: CODEASSURE_PROVIDER, CODEASSURE_MODEL, CODEASSURE_API_BASE (optional)
+#   Secrets:   CODEASSURE_API_KEY
 on:
   workflow_dispatch:
-    inputs:
-      provider:
-        description: "CodeAssure provider"
-        required: false
-        default: "openai-compatible"
-        type: choice
-        options:
-          - openai-compatible
-          - openai
-          - anthropic
-          - google
-          - gemini
-      model:
-        description: "Model id (OpenRouter uses e.g. anthropic/claude-sonnet-4.6)"
-        required: false
-        default: "anthropic/claude-sonnet-4.6"
-      api_base:
-        description: "API host (empty for the provider's default, e.g. Anthropic)"
-        required: false
-        default: "https://openrouter.ai/api/v1"
 
 jobs:
   sast-ai:
@@ -39,10 +22,9 @@ jobs:
           severity: "HIGH"
           scanner_version: v0.15.1
           accuknox_ai_analysis: "true"
-          codeassure_provider: ${{ inputs.provider }}
-          codeassure_model: ${{ inputs.model }}
-          codeassure_api_base: ${{ inputs.api_base }}
-          # API key for whichever provider is selected (OpenRouter, Anthropic, OpenAI, ...)
+          codeassure_provider: ${{ vars.CODEASSURE_PROVIDER }}
+          codeassure_model: ${{ vars.CODEASSURE_MODEL }}
+          codeassure_api_base: ${{ vars.CODEASSURE_API_BASE }}
           codeassure_api_key: ${{ secrets.CODEASSURE_API_KEY }}
 
       - name: Upload scan results
