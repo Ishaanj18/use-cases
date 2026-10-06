@@ -1,0 +1,54 @@
+name: Test AI SAST (CodeAssure)
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "CodeAssure provider"
+        required: false
+        default: "openai-compatible"
+        type: choice
+        options:
+          - openai-compatible
+          - openai
+          - anthropic
+          - google
+          - gemini
+      model:
+        description: "Model id (OpenRouter uses e.g. anthropic/claude-sonnet-4.6)"
+        required: false
+        default: "anthropic/claude-sonnet-4.6"
+      api_base:
+        description: "API host (empty for the provider's default, e.g. Anthropic)"
+        required: false
+        default: "https://openrouter.ai/api/v1"
+
+jobs:
+  sast-ai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Run Accuknox SAST: Opengrep + CodeAssure"
+        uses: ./.github/actions/sast-opengrep
+        with:
+          accuknox_endpoint: cspm.demo.accuknox.com
+          accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
+          accuknox_label: newLabel
+          soft_fail: "true"
+          severity: "HIGH"
+          scanner_version: v0.15.1
+          accuknox_ai_analysis: "true"
+          codeassure_provider: ${{ inputs.provider }}
+          codeassure_model: ${{ inputs.model }}
+          codeassure_api_base: ${{ inputs.api_base }}
+          # API key for whichever provider is selected (OpenRouter, Anthropic, OpenAI, ...)
+          codeassure_api_key: ${{ secrets.CODEASSURE_API_KEY }}
+
+      - name: Upload scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-ai-results
+          path: results.json
+          if-no-files-found: warn
