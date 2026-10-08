@@ -1,7 +1,8 @@
 name: Test AI SAST (CodeAssure)
 
 # Model settings come from repo Variables; the key comes from repo Secrets.
-#   Variables: CODEASSURE_PROVIDER, CODEASSURE_MODEL, CODEASSURE_API_BASE (optional)
+#   Variables: CODEASSURE_PROVIDER, CODEASSURE_MODEL, CODEASSURE_API_BASE (optional),
+#              AISCAN_SEVERITY (optional, e.g. HIGH,CRITICAL; empty = all findings)
 #   Secrets:   CODEASSURE_API_KEY
 on:
   workflow_dispatch:
@@ -26,6 +27,7 @@ jobs:
           codeassure_model: ${{ vars.CODEASSURE_MODEL }}
           codeassure_api_base: ${{ vars.CODEASSURE_API_BASE }}
           codeassure_api_key: ${{ secrets.CODEASSURE_API_KEY }}
+          aiscan_severity: ${{ vars.AISCAN_SEVERITY }}
 
       - name: Upload scan results
         if: always()

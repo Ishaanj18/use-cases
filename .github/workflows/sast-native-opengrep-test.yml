@@ -17,7 +17,7 @@ jobs:
           if [ -f /.dockerenv ]; then echo "dockerenv=true"; else echo "dockerenv=false"; fi
 
       - name: "Run Accuknox SAST: Opengrep"
-        uses: accuknox/sast-scan-opengrep-action@feat/native-opengrep-binary
+        uses: accuknox/sast-scan-opengrep-action@main
         with:
           accuknox_endpoint: cspm.demo.accuknox.com
           accuknox_token: ${{ secrets.ACCUKNOX_TOKEN }}
