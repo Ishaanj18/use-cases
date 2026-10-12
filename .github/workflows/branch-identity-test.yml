@@ -1,0 +1,38 @@
+# Test: does a SAST scan of a different branch land on the same Asset?
+# Runs ONLY on bit-* branches and uploads ONLY to stage (label testMig).
+# The other workflows are removed on these test branches so pushes here don't scan demo / other tenants.
+name: Branch identity test (stage)
+
+on:
+  push:
+    branches: ["bit-*"]
+  workflow_dispatch:
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Run AccuKnox SAST: Opengrep"
+        uses: accuknox/sast-scan-opengrep-action@main
+        with:
+          accuknox_endpoint: cspm.stage.accuknox.com
+          accuknox_token: ${{ secrets.STAGE_ACCUKNOX_TOKEN }}
+          accuknox_label: testMig
+          soft_fail: "true"
+          accuknox_ai_analysis: "false"
+
+      - name: Identity fields sent to AccuKnox
+        if: always()
+        run: |
+          jq '{repo, repo_url, ref, sha, findings: (.results | length)}' results.json || echo "results.json missing"
+          jq -r '.results[] | select(.path | startswith("bit/")) | "\(.check_id | split(".") | last)  \(.path):\(.start.line)"' results.json || true
+
+      - name: Keep results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-results-${{ github.ref_name }}
+          path: results.json
+          if-no-files-found: warn
